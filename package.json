@@ -1,0 +1,35 @@
+{
+  "name": "react-example",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently \"vite\" \"wget -qO- https://bootstrap.pypa.io/get-pip.py | python3 - --user && export PATH=$PATH:/root/.local/bin && pip install -r backend/requirements.txt && export PYTHONPATH=$(pwd) && python3 -m uvicorn backend.app.main:app --host 127.0.0.1 --port 8001 --reload\"",
+    "build": "vite build && wget -qO- https://bootstrap.pypa.io/get-pip.py | python3 - --user && export PATH=$PATH:/root/.local/bin && pip install -r backend/requirements.txt",
+    "start": "export PATH=$PATH:/root/.local/bin && export PYTHONPATH=$(pwd) && python3 -m uvicorn backend.app.main:app --host 0.0.0.0 --port 3000",
+    "preview": "vite preview",
+    "clean": "rm -rf dist server.js",
+    "lint": "tsc --noEmit"
+  },
+  "dependencies": {
+    "canvas-confetti": "^1.9.4",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.344.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-markdown": "^10.1.0",
+    "tailwind-merge": "^2.2.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.0.0",
+    "@types/canvas-confetti": "^1.9.0",
+    "@types/react": "^18.2.56",
+    "@types/react-dom": "^18.2.19",
+    "@vitejs/plugin-react": "^4.2.1",
+    "concurrently": "^9.1.2",
+    "tailwindcss": "^4.0.0",
+    "tsx": "^4.19.3",
+    "typescript": "^5.2.2",
+    "vite": "^6.4.3"
+  }
+}

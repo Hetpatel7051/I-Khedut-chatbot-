@@ -1,0 +1,2 @@
+sed -i 's/const sendMessage = useCallback(async (text: string, isVoice: boolean = false, imageDataUrl\?: string | null, imageMimeType\?: string | null) => {/const sendMessage = useCallback(async (text: string, isVoice: boolean = false, imageDataUrl\?: string | null, imageMimeType\?: string | null, audioBase64\?: string | null, audioMimeType\?: string | null) => {/' src/hooks/useChat.ts
+sed -i 's/image_mime_type: imageMimeType,/image_mime_type: imageMimeType,\n        audio_base64: audioBase64,\n        audio_mime_type: audioMimeType,/' src/hooks/useChat.ts

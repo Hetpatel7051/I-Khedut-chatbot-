@@ -1,0 +1,6 @@
+{
+  "name": "iKhedut AI Portal Assistant",
+  "description": "Generative AI assistant for Gujarat farmers to query government agricultural schemes, subsidy percentages, eligibility criteria, and required documents using voice and text in Gujarati, Hindi, and English.",
+  "requestFramePermissions": ["microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
