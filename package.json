@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "concurrently \"vite\" \"wget -qO- https://bootstrap.pypa.io/get-pip.py | python3 - --user && export PATH=$PATH:/root/.local/bin && pip install -r backend/requirements.txt && export PYTHONPATH=$(pwd) && python3 -m uvicorn backend.app.main:app --host 127.0.0.1 --port 8001 --reload\"",
-    "build": "vite build && wget -qO- https://bootstrap.pypa.io/get-pip.py | python3 - --user && export PATH=$PATH:/root/.local/bin && pip install -r backend/requirements.txt",
+    "build": "vite build",
     "start": "export PATH=$PATH:/root/.local/bin && export PYTHONPATH=$(pwd) && python3 -m uvicorn backend.app.main:app --host 0.0.0.0 --port 3000",
     "preview": "vite preview",
     "clean": "rm -rf dist server.js",
