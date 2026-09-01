@@ -31,6 +31,7 @@ export const MarketPricesModal: React.FC<MarketPricesModalProps> = ({
   onAskAboutCrop
 }) => {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [selectedDistrict, setSelectedDistrict] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
 
   const categories = [
@@ -42,9 +43,27 @@ export const MarketPricesModal: React.FC<MarketPricesModalProps> = ({
     { id: 'spices', label_gu: '🌶️ મસાલા (Jeera / લસણ / Cumin)', label_en: 'Spices', icon: '🌿' }
   ];
 
+  const districts = [
+    { id: 'all', name_gu: '📍 તમામ જિલ્લાઓ (All Mandis)', name_en: 'All Locations' },
+    { id: 'ગોંડલ', name_gu: 'ગોંડલ (Gondal APMC)', name_en: 'Gondal' },
+    { id: 'રાજકોટ', name_gu: 'રાજકોટ (Rajkot APMC)', name_en: 'Rajkot' },
+    { id: 'ઉંઝા', name_gu: 'ઉંઝા (Unjha APMC)', name_en: 'Unjha' },
+    { id: 'મહેસાણા', name_gu: 'મહેસાણા (Mehsana)', name_en: 'Mehsana' },
+    { id: 'અમદાવાદ', name_gu: 'અમદાવાદ (Ahmedabad)', name_en: 'Ahmedabad' },
+    { id: 'સુરત', name_gu: 'સુરત (Surat)', name_en: 'Surat' },
+    { id: 'જુનાગઢ', name_gu: 'જુનાગઢ (Junagadh)', name_en: 'Junagadh' },
+    { id: 'અમરેલી', name_gu: 'અમરેલી (Amreli)', name_en: 'Amreli' },
+    { id: 'બનાસકાંઠા', name_gu: 'ડીસા - બનાસકાંઠા (Deesa)', name_en: 'Deesa / Banaskantha' },
+    { id: 'ભાવનગર', name_gu: 'મહુવા - ભાવનગર (Mahuwa)', name_en: 'Mahuwa' }
+  ];
+
   const filteredPrices = useMemo(() => {
     return GUJARAT_MARKET_PRICES.filter((item) => {
       const matchCat = selectedCategory === 'all' || item.category === selectedCategory;
+      const matchDist = selectedDistrict === 'all' || 
+        item.district_gu.toLowerCase().includes(selectedDistrict.toLowerCase()) ||
+        item.market_name_gu.toLowerCase().includes(selectedDistrict.toLowerCase()) ||
+        item.market_name_en.toLowerCase().includes(selectedDistrict.toLowerCase());
       const q = searchQuery.toLowerCase().trim();
       const matchQuery = !q || 
         item.commodity_gu.toLowerCase().includes(q) ||
@@ -53,9 +72,9 @@ export const MarketPricesModal: React.FC<MarketPricesModalProps> = ({
         item.market_name_en.toLowerCase().includes(q) ||
         item.variety_gu.toLowerCase().includes(q) ||
         item.district_gu.toLowerCase().includes(q);
-      return matchCat && matchQuery;
+      return matchCat && matchDist && matchQuery;
     });
-  }, [selectedCategory, searchQuery]);
+  }, [selectedCategory, selectedDistrict, searchQuery]);
 
   if (!isOpen) return null;
 
@@ -76,13 +95,13 @@ export const MarketPricesModal: React.FC<MarketPricesModalProps> = ({
               <h3 className="text-base sm:text-lg font-bold flex items-center gap-2">
                 <span>{language === 'gu' ? 'ગુજરાત APMC બજાર ભાવ (Mandi Bhav)' : 'Gujarat APMC Live Mandi Rates'}</span>
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-400/20 text-amber-300 border border-amber-400/40">
-                  તાજા બજાર ભાવ
+                  સ્થળ પસંદગી સાથે (Location Selector)
                 </span>
               </h3>
               <p className="text-xs text-emerald-200">
                 {language === 'gu' 
-                  ? 'ઘઉં, જુવાર, બાજરી, શાકભાજી, ચોખા, રાયડો, દિવેલા, કપાસ, મગફળી અને જીરુંના આજના સત્તાવાર ભાવ'
-                  : 'Daily wholesale market arrivals and prices across Gondal, Rajkot, Unjha, Deesa & Mahuva mandis'}
+                  ? 'ઘઉં, જુવાર, બાજરી, કપાસ, મગફળી, જીરું અને રાયડાના આજના લાઇવ APMC ભાવ'
+                  : 'Daily wholesale market prices across Gujarat APMC mandis'}
               </p>
             </div>
           </div>
@@ -99,6 +118,28 @@ export const MarketPricesModal: React.FC<MarketPricesModalProps> = ({
 
         {/* Filter & Search Bar */}
         <div className="p-4 bg-stone-50 dark:bg-stone-900/90 border-b border-stone-200 dark:border-stone-800 space-y-3">
+          {/* Location / District Selector Row */}
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none text-xs">
+            <span className="text-[11px] font-bold text-stone-600 dark:text-stone-400 shrink-0 flex items-center gap-1">
+              <MapPin className="w-3.5 h-3.5 text-emerald-600" />
+              {language === 'gu' ? 'વિસ્તાર/જિલ્લો પસંદ કરો:' : 'Select Area:'}
+            </span>
+            {districts.map((dist) => (
+              <button
+                key={dist.id}
+                type="button"
+                onClick={() => setSelectedDistrict(dist.id)}
+                className={`px-3 py-1.5 rounded-lg whitespace-nowrap font-medium transition-all cursor-pointer ${
+                  selectedDistrict === dist.id
+                    ? 'bg-amber-500 text-emerald-950 font-bold shadow-xs'
+                    : 'bg-white dark:bg-stone-800 text-stone-700 dark:text-stone-300 border border-stone-200 dark:border-stone-700 hover:bg-stone-100'
+                }`}
+              >
+                <span>{language === 'gu' ? dist.name_gu : dist.name_en}</span>
+              </button>
+            ))}
+          </div>
+
           {/* Search Input */}
           <div className="relative">
             <Search className="w-4 h-4 text-stone-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
@@ -107,13 +148,13 @@ export const MarketPricesModal: React.FC<MarketPricesModalProps> = ({
               id="mandi-search-input"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={language === 'gu' ? 'પાક અથવા માર્કેટ શોધો (દા.ત. ઘઉં, જુવાર, બાજરી, બટાટા, રાયડો, દિવેલા, ગોંડલ)...' : 'Search crop or mandi (e.g. Wheat, Juvar, Bajra, Potato, Mustard, Castor)...'}
+              placeholder={language === 'gu' ? 'પાક અથવા માર્કેટ શોધો (દા.ત. ઘઉં, જુવાર, બાજરી, કપાસ, જીરું, ગોંડલ)...' : 'Search crop or mandi (e.g. Wheat, Juvar, Bajra, Cotton, Gondal)...'}
               className="w-full pl-10 pr-4 py-2 text-xs sm:text-sm rounded-xl border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
             />
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-stone-400 hover:text-stone-600 dark:hover:text-stone-200"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-stone-400 hover:text-stone-600"
               >
                 સાફ કરો
               </button>

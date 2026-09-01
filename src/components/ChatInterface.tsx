@@ -54,6 +54,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const latestAssistantRef = useRef<HTMLDivElement | null>(null);
 
   const {
     isRecording,
@@ -65,10 +66,17 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     cancelRecording
   } = useAudioRecorder();
 
-  // Scroll to bottom on new messages
+  // Scroll to the top of the latest assistant response like a real AI chat
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, isLoading]);
+    if (messages.length > 0) {
+      const lastMsg = messages[messages.length - 1];
+      if (lastMsg.sender === 'assistant') {
+        latestAssistantRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } else {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  }, [messages.length]);
 
   const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -157,23 +165,27 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   ];
 
   return (
-    <div id="chat-interface" className="flex-1 flex flex-col h-full bg-stone-100 dark:bg-stone-950 overflow-hidden">
+    <div id="chat-interface" className="flex-1 min-h-0 flex flex-col bg-stone-100 dark:bg-stone-950 overflow-hidden">
       {/* Messages Scroll Area */}
-      <div className="flex-1 overflow-y-auto px-3 sm:px-6 py-4 space-y-2">
+      <div className="flex-1 min-h-0 overflow-y-auto px-3 sm:px-6 py-4 space-y-2 overscroll-contain">
         <div className="max-w-4xl mx-auto space-y-4">
-          {messages.map((msg) => (
-            <MessageBubble
-              key={msg.id}
-              message={msg}
-              language={language}
-              farmerName={farmerProfile.name}
-              isPlayingAudio={currentlyPlayingAudioId === msg.id}
-              onPlayAudio={onPlayAudio}
-              onStopAudio={onStopAudio}
-              onOpenChecklist={onOpenChecklist}
-              onSelectCategory={(catQuery) => onSendMessage(catQuery, false)}
-            />
-          ))}
+          {messages.map((msg, idx) => {
+            const isLastAssistant = msg.sender === 'assistant' && idx === messages.length - 1;
+            return (
+              <div key={msg.id} ref={isLastAssistant ? latestAssistantRef : null}>
+                <MessageBubble
+                  message={msg}
+                  language={language}
+                  farmerName={farmerProfile.name}
+                  isPlayingAudio={currentlyPlayingAudioId === msg.id}
+                  onPlayAudio={onPlayAudio}
+                  onStopAudio={onStopAudio}
+                  onOpenChecklist={onOpenChecklist}
+                  onSelectCategory={(catQuery) => onSendMessage(catQuery, false)}
+                />
+              </div>
+            );
+          })}
 
           {/* Loading Bubble */}
           {isLoading && (
@@ -197,7 +209,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
       </div>
 
       {/* Suggested Quick Inquiry Chips */}
-      <div className="bg-white/80 dark:bg-stone-900/80 backdrop-blur-sm border-t border-stone-200 dark:border-stone-800 px-3 sm:px-6 py-2">
+      <div className="shrink-0 bg-white/80 dark:bg-stone-900/80 backdrop-blur-sm border-t border-stone-200 dark:border-stone-800 px-3 sm:px-6 py-2 z-10">
         <div className="max-w-4xl mx-auto flex items-center gap-2 overflow-x-auto pb-1 text-xs no-scrollbar">
           <span className="text-[11px] font-bold text-stone-500 dark:text-stone-400 whitespace-nowrap shrink-0 flex items-center gap-1">
             <Sparkles className="w-3 h-3 text-amber-500" />
@@ -217,7 +229,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
       </div>
 
       {/* Sticky Bottom Voice & Input Command Center */}
-      <div className="bg-white dark:bg-stone-900 border-t border-stone-200 dark:border-stone-800 px-3 sm:px-6 py-3">
+      <div className="shrink-0 bg-white dark:bg-stone-900 border-t border-stone-200 dark:border-stone-800 px-3 sm:px-6 py-2.5 pb-[max(0.75rem,env(safe-area-inset-bottom))] z-10">
         <div className="max-w-4xl mx-auto">
           {/* Selected Document Image Preview Bar */}
           {selectedImage && (

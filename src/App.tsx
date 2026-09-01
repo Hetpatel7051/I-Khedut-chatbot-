@@ -6,6 +6,7 @@ import { EligibilityCalculator } from './components/EligibilityCalculator';
 import { DocumentChecklistModal } from './components/DocumentChecklistModal';
 import { QuickSchemeDrawer } from './components/QuickSchemeDrawer';
 import { MarketPricesModal } from './components/MarketPricesModal';
+import { NewSchemesNotificationModal } from './components/NewSchemesNotificationModal';
 import { OfflineStatusBanner } from './components/OfflineStatusBanner';
 import { useChat } from './hooks/useChat';
 import { useNetworkStatus } from './hooks/useNetworkStatus';
@@ -32,6 +33,7 @@ export function App() {
   const [isCalculatorOpen, setIsCalculatorOpen] = useState(false);
   const [isSchemesDrawerOpen, setIsSchemesDrawerOpen] = useState(false);
   const [isPricesModalOpen, setIsPricesModalOpen] = useState(false);
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [activeChecklistScheme, setActiveChecklistScheme] = useState<Scheme | null>(null);
 
   const handleOpenChecklist = (scheme: Scheme) => {
@@ -43,7 +45,7 @@ export function App() {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-stone-100 dark:bg-stone-950 font-sans antialiased text-stone-900 dark:text-stone-100 overflow-hidden">
+    <div className="flex flex-col h-[100dvh] h-screen w-full bg-stone-100 dark:bg-stone-950 font-sans antialiased text-stone-900 dark:text-stone-100 overflow-hidden fixed inset-0">
       {/* Offline Alert Banner (shown when connection drops or is poor) */}
       <OfflineStatusBanner isOnline={isOnline} language={language} />
 
@@ -58,6 +60,7 @@ export function App() {
         onOpenSchemes={() => setIsSchemesDrawerOpen(true)}
         onOpenChecklist={() => {}}
         onOpenPrices={() => setIsPricesModalOpen(true)}
+        onOpenNotifications={() => setIsNotificationsOpen(true)}
       />
 
       {/* Main Chat Interface */}
@@ -114,6 +117,14 @@ export function App() {
         isOpen={isPricesModalOpen}
         onClose={() => setIsPricesModalOpen(false)}
         language={language}
+      />
+
+      {/* New Schemes & Subsidy Notifications Modal */}
+      <NewSchemesNotificationModal
+        isOpen={isNotificationsOpen}
+        onClose={() => setIsNotificationsOpen(false)}
+        language={language}
+        onAskAboutScheme={handleAskAIAboutScheme}
       />
     </div>
   );

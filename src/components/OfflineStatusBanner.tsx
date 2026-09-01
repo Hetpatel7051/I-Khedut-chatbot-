@@ -31,7 +31,7 @@ export const OfflineStatusBanner: React.FC<OfflineStatusBannerProps> = ({
     return (
       <div 
         id="offline-cache-alert-banner"
-        className="bg-amber-600 dark:bg-amber-700 text-white px-3 sm:px-4 py-2 text-xs flex items-center justify-between gap-3 shadow-md animate-in slide-in-from-top-2 border-b border-amber-500"
+        className="shrink-0 bg-amber-600 dark:bg-amber-700 text-white px-3 sm:px-4 py-2 text-xs flex items-center justify-between gap-3 shadow-md animate-in slide-in-from-top-2 border-b border-amber-500"
       >
         <div className="flex items-center gap-2.5 max-w-5xl mx-auto flex-1">
           <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center shrink-0">

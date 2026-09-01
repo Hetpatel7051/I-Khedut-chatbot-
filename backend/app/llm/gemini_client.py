@@ -38,14 +38,15 @@ async def process_chat(message: str, profile: Dict[str, Any], language: str = "g
     client = genai.Client(api_key=api_key)
     
     # Import locally to avoid circular dependencies
-    from backend.app.llm.prompts import get_system_prompt
+    from backend.app.core.config import settings
     from backend.app.services.mandi_service import fetch_mandi_prices
+    from backend.app.llm.prompts import get_system_prompt
     
     system_prompt = get_system_prompt(profile, language)
     
     try:
         chat = client.chats.create(
-            model="gemini-2.5-flash",
+            model=settings.GEMINI_MODEL,
             config=types.GenerateContentConfig(
                 system_instruction=system_prompt,
                 temperature=0.3,

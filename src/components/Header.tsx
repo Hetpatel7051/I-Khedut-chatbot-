@@ -15,7 +15,8 @@ import {
   Menu,
   X,
   ChevronRight,
-  Settings
+  Settings,
+  Bell
 } from 'lucide-react';
 
 interface HeaderProps {
@@ -28,6 +29,7 @@ interface HeaderProps {
   onOpenSchemes: () => void;
   onOpenChecklist: () => void;
   onOpenPrices?: () => void;
+  onOpenNotifications: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -38,7 +40,8 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenProfile,
   onOpenCalculator,
   onOpenSchemes,
-  onOpenPrices
+  onOpenPrices,
+  onOpenNotifications
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -59,7 +62,7 @@ export const Header: React.FC<HeaderProps> = ({
   }, [isMobileMenuOpen]);
 
   return (
-    <header id="ikhedut-header" className="sticky top-0 z-40 bg-emerald-900 text-white shadow-md border-b border-emerald-800 relative">
+    <header id="ikhedut-header" className="shrink-0 bg-emerald-900 text-white shadow-md border-b border-emerald-800 relative z-30">
       {/* Top Gujarat Government Identity Bar */}
       <div className="bg-emerald-950 px-4 py-1.5 text-xs text-emerald-200 flex flex-wrap items-center justify-between gap-2 border-b border-emerald-800/60">
         <div className="flex items-center gap-2 font-medium">
@@ -128,10 +131,23 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Action Controls & Navigation Buttons (Desktop) */}
         <div className="hidden md:flex items-center gap-3">
+          {/* New Schemes Notification Bell Button */}
+          <button
+            onClick={onOpenNotifications}
+            className="relative inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-800/90 hover:bg-emerald-700 text-xs font-semibold text-amber-300 transition-colors border border-emerald-700/60 shadow-sm cursor-pointer"
+            title="નવી સબસિડી યોજનાઓ"
+          >
+            <Bell className="w-3.5 h-3.5 text-amber-400" />
+            <span>{language === 'gu' ? 'યોજના સૂચનાઓ' : 'Notifications'}</span>
+            <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-red-600 text-white text-[9px] font-bold flex items-center justify-center">
+              ૫
+            </span>
+          </button>
+
           {onOpenPrices && (
             <button
               onClick={onOpenPrices}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-800/90 hover:bg-emerald-750 text-xs font-semibold text-amber-300 transition-colors border border-emerald-700/60 shadow-sm"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-800/90 hover:bg-emerald-750 text-xs font-semibold text-amber-300 transition-colors border border-emerald-700/60 shadow-sm cursor-pointer"
               title="ગુજરાત માર્કેટ યાર્ડ પાક ભાવ"
             >
               <TrendingUp className="w-3.5 h-3.5 text-amber-400" />
@@ -141,7 +157,7 @@ export const Header: React.FC<HeaderProps> = ({
 
           <button
             onClick={onOpenSchemes}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-800/80 hover:bg-emerald-700 text-xs font-medium text-emerald-100 transition-colors border border-emerald-700/50 shadow-sm"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-800/80 hover:bg-emerald-700 text-xs font-medium text-emerald-100 transition-colors border border-emerald-700/50 shadow-sm cursor-pointer"
           >
             <BookOpen className="w-3.5 h-3.5 text-amber-300" />
             <span>{language === 'gu' ? 'તમામ યોજનાઓ' : language === 'hi' ? 'सभी योजनाएं' : 'All Schemes'}</span>
@@ -149,10 +165,19 @@ export const Header: React.FC<HeaderProps> = ({
 
           <button
             onClick={onOpenCalculator}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-xs font-bold text-emerald-950 shadow-sm transition-transform active:scale-95"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-xs font-bold text-emerald-950 shadow-sm transition-transform active:scale-95 cursor-pointer"
           >
             <Calculator className="w-3.5 h-3.5" />
             <span>{language === 'gu' ? 'સબસિડી કેલ્ક્યુલેટર' : language === 'hi' ? 'सब्सिडी कैलकुलेटर' : 'Calculator'}</span>
+          </button>
+
+          {/* Settings / Profile Button */}
+          <button
+            onClick={onOpenProfile}
+            className="p-1.5 rounded-lg bg-emerald-800 hover:bg-emerald-700 text-emerald-200 hover:text-white transition-colors border border-emerald-700/60 cursor-pointer"
+            title="પ્રોફાઇલ અને સેટિંગ્સ"
+          >
+            <Settings className="w-4 h-4 text-amber-300" />
           </button>
 
           {/* Language Selector */}
@@ -172,6 +197,18 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Mobile Menu Toggle Button */}
         <div className="flex md:hidden items-center gap-2">
+          {/* Notification Button Mobile */}
+          <button
+            onClick={onOpenNotifications}
+            className="relative p-2 rounded-lg bg-emerald-800 hover:bg-emerald-700 text-amber-300 border border-emerald-700/60 transition-colors"
+            title="યોજના સૂચનાઓ"
+          >
+            <Bell className="w-4 h-4" />
+            <span className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-red-600 text-white text-[9px] font-bold flex items-center justify-center">
+              ૫
+            </span>
+          </button>
+
           {/* Quick Language Toggle on Mobile */}
           <select
             value={language}
@@ -192,7 +229,7 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
       </div>
 
-      {/* Active Profile Info Banner (Clean Desktop + Mobile) */}
+      {/* Active Profile Info Banner (Clean Desktop + Mobile) without Edit button */}
       <div className="bg-emerald-950 px-4 py-2 text-[11px] text-emerald-200 border-t border-emerald-800/80 flex items-center justify-between gap-4 overflow-x-auto whitespace-nowrap shadow-inner">
         <div className="flex items-center gap-3">
           <span className="flex items-center gap-1.5 bg-emerald-900/60 px-2 py-0.5 rounded-full text-amber-300 font-medium border border-emerald-800/50">
@@ -204,26 +241,39 @@ export const Header: React.FC<HeaderProps> = ({
             {farmerProfile.district.split(' ')[0]}
           </span>
           <span className="text-emerald-600">•</span>
-          <span>જમીન: <strong className="text-white">{farmerProfile.land_size_acres} {farmerProfile.land_unit === 'acres' ? 'એકર' : 'વીઘા'}</strong></span>
+          <span>જમીન: <strong className="text-white">{farmerProfile.land_size_acres} {farmerProfile.land_unit === 'acres' ? 'એકર' : 'વીઘਾ'}</strong></span>
           <span className="text-emerald-600">•</span>
           <span>કેટેગરી: <strong className="text-white">{farmerProfile.caste_category}</strong></span>
           <span className="text-emerald-600 hidden sm:inline">•</span>
           <span className="hidden sm:inline">પાક: <strong className="text-white">{farmerProfile.primary_crops.join(', ')}</strong></span>
         </div>
-
-        <button 
-          onClick={onOpenProfile}
-          className="inline-flex items-center gap-1 px-3 py-1 bg-emerald-800 hover:bg-emerald-700 text-amber-300 rounded-full font-medium shrink-0 transition-colors border border-emerald-700 shadow-sm"
-        >
-          <Settings className="w-3 h-3" />
-          <span>{language === 'gu' ? 'પ્રોફાઇલ' : 'Edit'}</span>
-        </button>
       </div>
 
-      {/* Mobile Menu Dropdown Panel */}
+      {/* Mobile Menu Dropdown Panel (Contains Edit Profile & Settings moved from slide bar) */}
       {isMobileMenuOpen && (
         <div ref={menuRef} className="md:hidden absolute top-full left-0 right-0 bg-emerald-900 border-b border-emerald-800 shadow-xl origin-top animate-in slide-in-from-top-2 z-50">
           <div className="p-3 space-y-2">
+            {/* Edit Profile & Settings option moved into 3-line menu */}
+            <button
+              onClick={() => { onOpenProfile(); setIsMobileMenuOpen(false); }}
+              className="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-emerald-800 hover:bg-emerald-750 border border-emerald-700 text-amber-300 transition-colors shadow-sm"
+            >
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-emerald-950 rounded-lg">
+                  <Settings className="w-4 h-4 text-amber-400" />
+                </div>
+                <div className="text-left">
+                  <span className="font-bold block text-sm">
+                    {language === 'gu' ? 'પ્રોફાઇલ અને જમીન વિગતો બદલો' : 'Edit Profile & Land Details'}
+                  </span>
+                  <span className="text-[10px] text-emerald-200">
+                    {farmerProfile.name} • {farmerProfile.district} ({farmerProfile.land_size_acres} વીઘા)
+                  </span>
+                </div>
+              </div>
+              <ChevronRight className="w-4 h-4 text-emerald-400" />
+            </button>
+
             {onOpenPrices && (
               <button
                 onClick={() => { onOpenPrices(); setIsMobileMenuOpen(false); }}
@@ -233,7 +283,7 @@ export const Header: React.FC<HeaderProps> = ({
                   <div className="p-2 bg-emerald-950 rounded-lg">
                     <TrendingUp className="w-4 h-4" />
                   </div>
-                  <span className="font-semibold">{language === 'gu' ? 'બજાર ભાવ (APMC)' : language === 'hi' ? 'बाजार भाव' : 'Mandi Rates'}</span>
+                  <span className="font-semibold">{language === 'gu' ? 'બજાર ભાવ (APMC Mandi)' : 'Mandi Rates'}</span>
                 </div>
                 <ChevronRight className="w-4 h-4 text-emerald-500" />
               </button>

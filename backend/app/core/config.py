@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     
     # Google Gemini GenAI SDK
     GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
-    GEMINI_MODEL: str = "gemini-2.5-flash"
+    GEMINI_MODEL: str = "gemini-2.0-flash"
     EMBEDDING_MODEL: str = "models/text-embedding-004"
     
     # Bhashini Speech & Language Services (Ministry of Electronics and IT, India)
