@@ -11,7 +11,7 @@ class GeminiEmbedder:
     def __init__(self):
         self.api_key = settings.GEMINI_API_KEY
         self.client = None
-        if self.api_key:
+        if self.api_key and self.api_key.startswith("AIza"):
             try:
                 self.client = genai.Client(api_key=self.api_key)
             except Exception as e:
