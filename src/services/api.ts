@@ -181,24 +181,7 @@ function fallbackClientChat(payload: ChatRequestPayload): ChatResponsePayload {
 
   // 3. Mandi APMC Market Prices & Weather
   const isMandiQuery = 
-    query.includes('mandi') || query.includes('market') || query.includes('ભાવ') || query.includes('bhav') ||
-    query.includes('rate') || query.includes('price') || query.includes('યાર્ડ') ||
-    query.includes('weather') || query.includes('હવામાન') || query.includes('વરસાદ') ||
-    query.includes('wheat') || query.includes('ઘઉં') ||
-    query.includes('juvar') || query.includes('jowar') || query.includes('જુવાર') ||
-    query.includes('bajar') || query.includes('bajra') || query.includes('બાજરી') ||
-    query.includes('vegetable') || query.includes('શાકભાજી') ||
-    query.includes('chokh') || query.includes('ચોખા') || query.includes('ડાંગર') || query.includes('rice') || query.includes('paddy') ||
-    query.includes('mustard') || query.includes('musturd') || query.includes('રાયડો') || query.includes('સરસવ') || query.includes('rai') ||
-    query.includes('divela') || query.includes('દિવેલા') || query.includes('એરંડા') || query.includes('castor') ||
-    query.includes('potato') || query.includes('બટાટા') || query.includes('batata') ||
-    query.includes('onion') || query.includes('ડુંગળી') || query.includes('dungli') ||
-    query.includes('tomato') || query.includes('ટામેટા') || query.includes('tameta') ||
-    query.includes('marcha') || query.includes('મરચા') || query.includes('chilli') ||
-    query.includes('garlic') || query.includes('lasan') || query.includes('લસણ') ||
-    query.includes('cotton') || query.includes('કપાસ') || query.includes('kapas') ||
-    query.includes('groundnut') || query.includes('મગફળી') || query.includes('magfali') ||
-    query.includes('cumin') || query.includes('જીરું') || query.includes('jeera');
+    /(^|\s)(mandi|market|ભાવ|bhav|rate|price|યાર્ડ|weather|હવામાન|વરસાદ|wheat|ઘઉં|juvar|jowar|જુવાર|bajar|bajra|બાજરી|vegetable|શાકભાજી|chokh|ચોખા|ડાંગર|rice|paddy|mustard|musturd|રાયડો|સરસવ|rai|divela|દિવેલા|એરંડા|castor|potato|બટાટા|batata|onion|ડુંગળી|dungli|tomato|ટામેટા|tameta|marcha|મરચા|chilli|garlic|lasan|લસણ|cotton|કપાસ|kapas|groundnut|મગફળી|magfali|cumin|જીરું|jeera)(\s|$|\?|\.|,)/i.test(query);
 
   if (isMandiQuery && !query.includes('ટ્રેક્ટર') && !query.includes('તાર વાડ')) {
     let matchedCrops = searchCropPrices(query);
@@ -236,7 +219,8 @@ function fallbackClientChat(payload: ChatRequestPayload): ChatResponsePayload {
   }
 
   // 4. Conversational Form Filling (I want to apply / અરજી કરવી છે)
-  if (query.includes('apply') || query.includes('અરજી') || query.includes('ફોર્મ') || query.includes('form') || query.includes('ભરવું')) {
+  const isFormQuery = /(^|\s)(apply|અરજી|ફોર્મ|form|ભરવું)(\s|$|\?|\.|,)/i.test(query) && query.includes('ટ્રેક્ટર');
+  if (isFormQuery) {
     return {
       response_text: lang === 'gu'
         ? `📝 **આઈ-ખેડૂત ઓનલાઈન સહાય અરજી ડ્રાફ્ટ (Pre-Filled Application):**\n\nનમસ્તે **${farmerName}**! તમારી પ્રોફાઈલ વિગતો (${farmerDistrict}, ${farmerLand} એકર જમીન, ${farmerCaste} કેટેગરી) ના આધારે **ટ્રેક્ટર સહાય યોજના** માટેનું પ્રિ-ફિલ્ડ ફોર્મ તૈયાર કરવામાં આવ્યું છે.\n\nતમે નીચે આપેલા બટન પરથી સીધું **PDF ફોર્મ ડાઉનલોડ/પ્રિન્ટ** કરી શકો છો અથવા ikhedut.gujarat.gov.in પર અપલોડ કરી શકો છો.`
@@ -267,7 +251,8 @@ function fallbackClientChat(payload: ChatRequestPayload): ChatResponsePayload {
   }
 
   // 5. Feature 1: Greeting & Scheme Category Greeting Flow
-  if (query.includes('hello') || query.includes('નમસ્તે') || query.includes('યોજના') || query.includes('scheme') || query.includes('કેટેગરી') || query.includes('category') || query.includes('હાય')) {
+  const isGreeting = /(^|\s)(hello|નમસ્તે|યોજના|scheme|કેટેગરી|category|હાય)(\s|$|\?|\.|,)/i.test(query) && !query.includes('સહાય');
+  if (isGreeting) {
     return {
       response_text: lang === 'gu'
         ? `🙏 **નમસ્તે ${farmerName}! આઈ-ખેડૂત પોર્ટલ આસિસ્ટન્ટમાં તમારું સ્વાગત છે.**\n\nતમે કયા વિભાગની યોજનાઓ જોવા માંગો છો? નીચે આપેલા સત્તાવાર કેટેગરી બટન પર ક્લિક કરીને માહિતી મેળવી શકો છો:`

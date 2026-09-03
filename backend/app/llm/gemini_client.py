@@ -104,7 +104,8 @@ async def process_chat(message: str, profile: Dict[str, Any], language: str = "g
                 return f"🙏 **નમસ્તે {farmer_name}! આઈ-ખેડૂત પોર્ટલ AI સહાયકમાં તમારું સ્વાગત છે.**\n\nતમે કયા વિભાગની યોજનાઓ જોવા માંગો છો? નીચે આપેલા સત્તાવાર કેટેગરી બટન પર ક્લિક કરીને માહિતી મેળવી શકો છો:"
             return f"🙏 **Hello {farmer_name}! Welcome to the iKhedut Portal Assistant.**\n\nWhich department schemes would you like to explore? Please select a category below:"
         
-        if "market" in message.lower() or "mandi" in message.lower() or "ભાવ" in message.lower():
+        import re
+        if re.search(r'(^|\s)(market|mandi|ભાવ|bhav)(\s|$|\?|\.|,)', message.lower()):
             if language == "gu":
                 return f"📊 **તાજા ગુજરાત APMC બજાર ભાવ (આજના તાજા ભાવ):**\n\n• **જીરું:** ₹4800 થી ₹5950 / ૨૦ કિગ્રા - *ઊંઝા માર્કેટ યાર્ડ*\n• **કપાસ (શંકર-6):** ₹1400 થી ₹1685 / ૨૦ કિગ્રા - *ગોંડલ માર્કેટ યાર્ડ*\n\n💡 **બજાર સલાહ:** સૂકા અને ગ્રેડિંગ કરેલા માલના ઊંચા ભાવ મળે છે. સંપૂર્ણ યાદી નીચે આપેલા કાર્ડમાં જોઈ શકો છો."
             return f"📊 **Latest Gujarat APMC Mandi Rates Today:**\n\n• **Cumin Seeds (Jeera):** ₹4800 to ₹5950 / 20kg - *Unjha APMC*\n• **Cotton (Shankar-6):** ₹1400 to ₹1685 / 20kg - *Gondal APMC*\n\n💡 **Market Advisory:** Graded and low-moisture produce commands premium bids. You can view all crop rates in the card below."

@@ -288,13 +288,6 @@ export function useChat() {
       };
 
       setMessages(prev => [...prev, assistantMessage]);
-
-      // If user queried with voice, automatically trigger voice playback for seamless accessible experience
-      if (isVoice && res.response_text) {
-        setTimeout(() => {
-          playAudio(assistantMessage.id, assistantMessage.content, assistantMessage.audioBase64);
-        }, 300);
-      }
     } catch (err) {
       console.error('Failed to get AI response:', err);
       const errorMessage: ChatMessage = {
