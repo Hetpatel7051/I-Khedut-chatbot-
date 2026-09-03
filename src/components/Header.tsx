@@ -64,7 +64,7 @@ export const Header: React.FC<HeaderProps> = ({
   return (
     <header id="ikhedut-header" className="shrink-0 bg-emerald-900 text-white shadow-md border-b border-emerald-800 relative z-30">
       {/* Top Gujarat Government Identity Bar */}
-      <div className="bg-emerald-950 px-4 py-1.5 text-xs text-emerald-200 flex flex-wrap items-center justify-between gap-2 border-b border-emerald-800/60">
+      {/* <div className="bg-emerald-950 px-4 py-1.5 text-xs text-emerald-200 flex flex-wrap items-center justify-between gap-2 border-b border-emerald-800/60">
         <div className="flex items-center gap-2 font-medium">
           <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-amber-500 text-emerald-950 font-bold text-[10px]">
             ગુ
@@ -74,9 +74,9 @@ export const Header: React.FC<HeaderProps> = ({
           <span className="hidden sm:inline text-emerald-400">| iKhedut Portal AI Assistant</span>
         </div>
         
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3"> */}
           {/* Service Worker Offline Cache Status */}
-          <div className="flex items-center gap-1.5 text-emerald-300">
+          {/* <div className="flex items-center gap-1.5 text-emerald-300">
             {isOnline ? (
               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-800/80 text-[10px] text-emerald-200 font-medium">
                 <Wifi className="w-3 h-3 text-emerald-400" />
@@ -92,16 +92,16 @@ export const Header: React.FC<HeaderProps> = ({
             <span className="hidden md:inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-emerald-900/80 text-[10px] text-emerald-300 font-mono">
               <Database className="w-3 h-3 text-amber-400" />
               SW Cache Active
-            </span>
-          </div>
+            </span> */}
+          {/* </div>
 
           {/* Quick Voice Prompt Reminder */}
-          <div className="hidden lg:flex items-center gap-1 text-amber-300 font-medium text-[11px]">
+          {/* <div className="hidden lg:flex items-center gap-1 text-amber-300 font-medium text-[11px]">
             <Volume2 className="w-3.5 h-3.5 animate-bounce" />
             <span>બોલીને પૂછો (Voice Enabled)</span>
           </div>
         </div>
-      </div>
+      </div>  */}
 
       {/* Main Navigation Header */}
       <div className="max-w-7xl mx-auto px-3 sm:px-6 py-3 flex items-center justify-between gap-3">
