@@ -110,6 +110,85 @@ export async function fetchApplicationStatus(applicationId: string) {
   return null;
 }
 
+// Helper function to find matching schemes with intelligent scoring
+function findMatchingSchemes(rawQuery: string): Scheme[] {
+  const q = rawQuery.toLowerCase().trim();
+
+  const schemeKeywordMap: Record<string, string[]> = {
+    'ikhedut-sch-002': [
+      'drip', 'sprinkler', 'micro irrigation', 'irrigation', 'water saving', 'ggrc',
+      'water', 'pipe', 'pipeline', 'borewell', 'tubewell',
+      'ટપક', 'સિંચાઈ', 'ફુવારા', 'સૂક્ષ્મ પિયત', 'પિયત', 'ટપક સિંચાઈ', 'ડ્રિપ', 'પાઈપલાઈન', 'જળ'
+    ],
+    'ikhedut-sch-001': [
+      'tractor', 'machinery', 'farming equipment', 'rotavator', 'cultivator', 'plough',
+      'trolley', 'thresher', 'power tiller',
+      'ટ્રેક્ટર', 'સાધન', 'યાંત્રિકીકરણ', 'ખેતીવાડી સાધન', 'રોટાવેટર', 'હળ', 'ટ્રોલી'
+    ],
+    'ikhedut-sch-003': [
+      'fencing', 'barbed wire', 'wire', 'kantedar', 'protection', 'nilgai', 'boar', 'wild animal',
+      'વાડ', 'તાર', 'કાંટાળી', 'તાર વાડ', 'ફેન્સિંગ', 'રોઝ', 'ભૂંડ', 'જંગલી જનાવર', 'પાક રક્ષણ'
+    ],
+    'ikhedut-sch-004': [
+      'cow', 'desi cow', 'cattle', 'dairy', 'livestock', 'jeevamrut', 'natural farming', 'gir', 'kankrej',
+      'ગાય', 'દેશી ગાય', 'ગૌ સહાય', 'પ્રાકૃતિક ખેતી', 'જીવામૃત', 'પશુપાલન', 'દૂધ', 'ગીર', 'કાંકરેજ', 'નિભાવ'
+    ],
+    'ikhedut-sch-005': [
+      'drone', 'spraying', 'pesticide', 'agro drone', 'sprayer',
+      'ડ્રોન', 'છંટકાવ', 'દવા છંટકાવ', 'એગ્રો ડ્રોન'
+    ],
+    'ikhedut-sch-006': [
+      'smartphone', 'smart phone', 'mobile', 'phone', 'digital',
+      'સ્માર્ટફોન', 'મોબાઈલ', 'ફોન', 'સ્માર્ટ ફોન'
+    ],
+    'ikhedut-sch-007': [
+      'solar', 'solar pump', 'kusum', 'pm-kusum', 'sun', 'solar energy',
+      'સોલાર', 'સોલાર પંપ', 'સૂર્ય ઊર્જા', 'કુસુમ'
+    ],
+    'ikhedut-sch-008': [
+      'godown', 'storage', 'warehouse', 'post harvest', 'shed',
+      'ગોડાઉન', 'સંગ્રહ', 'માળખું', 'વેરહાઉસ'
+    ],
+    'ikhedut-sch-009': [
+      'greenhouse', 'shade net', 'polyhouse',
+      'ગ્રીનહાઉસ', 'શેડનેટ', 'પોલીહાઉસ'
+    ],
+    'ikhedut-sch-010': [
+      'mulching', 'plastic mulching',
+      'મલ્ચિંગ', 'પ્લાસ્ટિક મલ્ચિંગ'
+    ]
+  };
+
+  const scored = IKHEDUT_SCHEMES.map(scheme => {
+    let score = 0;
+    const keywords = schemeKeywordMap[scheme.id] || [];
+
+    for (const kw of keywords) {
+      if (q.includes(kw.toLowerCase())) {
+        score += kw.length > 5 ? 4 : 2;
+      }
+    }
+
+    for (const tag of scheme.tags) {
+      if (q.includes(tag.toLowerCase())) {
+        score += 3;
+      }
+    }
+
+    if (q.includes(scheme.name_en.toLowerCase())) score += 8;
+    if (q.includes(scheme.name_gu.toLowerCase())) score += 8;
+    if (scheme.name_hi && q.includes(scheme.name_hi.toLowerCase())) score += 8;
+
+    if (q.includes(scheme.category.toLowerCase())) score += 2;
+    if (q.includes(scheme.category_gu.toLowerCase())) score += 2;
+
+    return { scheme, score };
+  });
+
+  const matches = scored.filter(s => s.score > 0).sort((a, b) => b.score - a.score);
+  return matches.map(m => m.scheme);
+}
+
 function fallbackClientChat(payload: ChatRequestPayload): ChatResponsePayload {
   const query = (payload.message || '').toLowerCase();
   const lang = payload.language || 'gu';
@@ -183,7 +262,7 @@ function fallbackClientChat(payload: ChatRequestPayload): ChatResponsePayload {
   const isMandiQuery = 
     /(^|\s)(mandi|market|ભાવ|bhav|rate|price|યાર્ડ|weather|હવામાન|વરસાદ|wheat|ઘઉં|juvar|jowar|જુવાર|bajar|bajra|બાજરી|vegetable|શાકભાજી|chokh|ચોખા|ડાંગર|rice|paddy|mustard|musturd|રાયડો|સરસવ|rai|divela|દિવેલા|એરંડા|castor|potato|બટાટા|batata|onion|ડુંગળી|dungli|tomato|ટામેટા|tameta|marcha|મરચા|chilli|garlic|lasan|લસણ|cotton|કપાસ|kapas|groundnut|મગફળી|magfali|cumin|જીરું|jeera)(\s|$|\?|\.|,)/i.test(query);
 
-  if (isMandiQuery && !query.includes('ટ્રેક્ટર') && !query.includes('તાર વાડ')) {
+  if (isMandiQuery && !query.includes('ટ્રેક્ટર') && !query.includes('તાર વાડ') && !query.includes('drip') && !query.includes('ટપક')) {
     let matchedCrops = searchCropPrices(query);
     if (matchedCrops.length === 0) {
       matchedCrops = GUJARAT_MARKET_PRICES.slice(0, 6);
@@ -250,9 +329,17 @@ function fallbackClientChat(payload: ChatRequestPayload): ChatResponsePayload {
     };
   }
 
-  // 5. Feature 1: Greeting & Scheme Category Greeting Flow
-  const isGreeting = /(^|\s)(hello|નમસ્તે|યોજના|scheme|કેટેગરી|category|હાય)(\s|$|\?|\.|,)/i.test(query) && !query.includes('સહાય');
-  if (isGreeting) {
+  // 5. Intelligent Scheme Matching (RAG)
+  const matched = findMatchingSchemes(query);
+
+  // 6. Greeting & Category Menu Flow:
+  // A query is ONLY a greeting if NO specific scheme was matched AND it explicitly asks for greetings/categories
+  const isGreetingWord = /(^|\s)(hello|hi|hey|નમસ્તે|હાય|kem cho|કેમ છો|good morning|good evening|સુપ્રભાત|પ્રણામ|રામ રામ)(\s|$|\?|\.|!|,)/i.test(query)
+    || /^(categories|category|all schemes|show schemes|show categories|કેટેગરી|વિભાગો|બધી યોજનાઓ|બધા વિભાગ|મેનુ)(\s|$|\?|\.|!|,)/i.test(query.trim());
+
+  const isPureGreeting = isGreetingWord && matched.length === 0;
+
+  if (isPureGreeting) {
     return {
       response_text: lang === 'gu'
         ? `🙏 **નમસ્તે ${farmerName}! આઈ-ખેડૂત પોર્ટલ આસિસ્ટન્ટમાં તમારું સ્વાગત છે.**\n\nતમે કયા વિભાગની યોજનાઓ જોવા માંગો છો? નીચે આપેલા સત્તાવાર કેટેગરી બટન પર ક્લિક કરીને માહિતી મેળવી શકો છો:`
@@ -265,43 +352,71 @@ function fallbackClientChat(payload: ChatRequestPayload): ChatResponsePayload {
     };
   }
 
-  const matched = IKHEDUT_SCHEMES.filter(s => {
-    return (
-      query.includes(s.name_gu) ||
-      query.includes(s.name_en.toLowerCase()) ||
-      s.tags.some(t => query.includes(t.toLowerCase()))
-    );
-  });
+  // 7. Profile Information Query
+  if (query.includes('નામ') || query.includes('who am i') || query.includes('પ્રોફાઈલ') || (query.includes('profile') && !query.includes('scheme'))) {
+    const profileText = lang === 'gu'
+      ? `🌾 **તમારી ખેડૂત પ્રોફાઈલ વિગત:**\n\n• **નામ:** ${farmerName}\n• **જિલ્લો:** ${farmerDistrict}\n• **જમીન ધારણ:** ${farmerLand} એકર\n• **કેટેગરી:** ${farmerCaste}\n\nતમે ઉપર 'પ્રોફાઇલ બદલો' બટન પરથી ગમે ત્યારે તમારી વિગતો સુધારી શકો છો.`
+      : `🌾 **Your Farmer Profile:**\n\n• **Name:** ${farmerName}\n• **District:** ${farmerDistrict}\n• **Landholding:** ${farmerLand} Acres\n• **Category:** ${farmerCaste}\n\nYou can update these details anytime from the header profile button.`;
 
-  let responseText = '';
-  if (query.includes('નામ') || query.includes('name') || query.includes('who am i') || query.includes('પ્રોફાઈલ') || query.includes('profile')) {
-    if (lang === 'gu') {
-      responseText = `🌾 **તમારી ખેડૂત પ્રોફાઈલ વિગત:**\n\n• **નામ:** ${farmerName}\n• **જિલ્લો:** ${farmerDistrict}\n• **જમીન ધારણ:** ${farmerLand} એકર\n• **કેટેગરી:** ${farmerCaste}\n\nતમે ઉપર 'પ્રોફાઇલ બદલો' બટન પરથી ગમે ત્યારે તમારી વિગતો સુધારી શકો છો.`;
-    } else {
-      responseText = `🌾 **Your Farmer Profile:**\n\n• **Name:** ${farmerName}\n• **District:** ${farmerDistrict}\n• **Landholding:** ${farmerLand} Acres\n• **Category:** ${farmerCaste}`;
-    }
-  } else if (matched.length > 0) {
+    return {
+      response_text: profileText,
+      language: lang,
+      matched_schemes: [IKHEDUT_SCHEMES[0]],
+      citations: ['ખેડૂત પ્રોફાઇલ ડેટા'],
+      intent: 'profile_info'
+    };
+  }
+
+  // 8. Specific Scheme Response
+  if (matched.length > 0) {
     const sch = matched[0];
-    if (lang === 'gu') {
-      responseText = `🌾 **${sch.name_gu}**\n\nનમસ્તે **${farmerName}**! તમારી **${farmerDistrict}** જિલ્લાની **${farmerLand} એકર** જમીન અને **${farmerCaste}** કેટેગરી મુજબ આ યોજના હેઠળ તમને **${sch.subsidy_percentage}** સુધી સહાય (મહત્તમ **₹${sch.max_subsidy_amount.toLocaleString('en-IN')}**) મળવાપાત્ર છે.\n\n📋 **જરૂરી કાગળો:**\n${sch.required_documents_gu.map((d, i) => `${i + 1}. ${d}`).join('\n')}\n\n✅ **પાત્રતા માપદંડ:**\n${sch.eligibility_criteria_gu.map((e, i) => `• ${e}`).join('\n')}\n\n🌐 **અરજી:** આઈ-ખેડૂત પોર્ટલ (ikhedut.gujarat.gov.in) પર ઓનલાઈન અરજી કરવી.`;
-    } else if (lang === 'hi') {
-      responseText = `🌾 **${sch.name_hi || sch.name_en}**\n\nनमस्ते **${farmerName}**! इस योजना के तहत आपको **${sch.subsidy_percentage}** तक (अधिकतम **₹${sch.max_subsidy_amount.toLocaleString('en-IN')}**) सहायता प्राप्त हो सकती है।\n\n📋 **आवश्यक दस्तावेज:**\n${sch.required_documents_en.map((d, i) => `${i + 1}. ${d}`).join('\n')}\n\n🌐 ऑनलाइन आवेदन ikhedut.gujarat.gov.in पर करें।`;
+    let responseText = '';
+
+    // Specialized high-fidelity answers for key schemes
+    if (sch.id === 'ikhedut-sch-002') {
+      // Drip / Micro Irrigation Scheme
+      if (lang === 'gu') {
+        responseText = `💧 **${sch.name_gu}**\n\nનમસ્તે **${farmerName}**! હા, ગુજરાત સરકાર દ્વારા **ટપક અને ફુવારા પિયત પદ્ધતિ (ડ્રિપ ઇરિગેશન)** માટે GGRC અને આઈ-ખેડૂત પોર્ટલ મારફતે વિશેષ સબસિડી યોજના ઉપલબ્ધ છે.\n\nતમારી **${farmerDistrict}** જિલ્લાની **${farmerLand} એકર** જમીન અને **${farmerCaste}** કેટેગરી મુજબ તમને **${sch.subsidy_percentage}** સુધી સહાય (મહત્તમ **₹${sch.max_subsidy_amount.toLocaleString('en-IN')}**) મળવાપાત્ર છે.\n\n💰 **સબસિડી વિગત:**\n• **સામાન્ય ખેડૂતો:** કુલ યુનિટ ખર્ચના ૫૫% સહાય\n• **નાના અને સીમાંત ખેડૂતો (૨ હેક્ટરથી ઓછી જમીન):** ૭૦% સહાય\n• **SC / ST / આદિજાતિ ખેડૂતો:** ૭૦% થી ૮૫% સહાય\n\n✅ **મુખ્ય પાત્રતા માપદંડ:**\n${sch.eligibility_criteria_gu.map((e, i) => `• ${e}`).join('\n')}\n\n📋 **જરૂરી કાગળો:**\n${sch.required_documents_gu.map((d, i) => `${i + 1}. ${d}`).join('\n')}\n\n🌐 **અરજી પ્રક્રિયા:** GGRC પોર્ટલ (ggrc.co.in) અથવા ikhedut.gujarat.gov.in પર ઓનલાઈન અરજી કરવી.`;
+      } else if (lang === 'hi') {
+        responseText = `💧 **${sch.name_hi || sch.name_en}**\n\nनमस्ते **${farmerName}**! जी हाँ, गुजरात सरकार द्वारा ड्रिप और स्प्रिंकलर सिंचाई (Micro Irrigation) के लिए iKhedut और GGRC के माध्यम से विशेष सब्सिडी योजना उपलब्ध है।\n\nआपकी **${farmerDistrict}** में **${farmerLand} एकड़** भूमि (${farmerCaste} वर्ग) के अनुसार आपको **${sch.subsidy_percentage}** (अधिकतम **₹${sch.max_subsidy_amount.toLocaleString('en-IN')}**) सहायता मिल सकती है।\n\n💰 **सब्सिडी विवरण:**\n• **सामान्य किसान:** 55% सहायता\n• **लघु एवं सीमांत किसान:** 70% सहायता\n• **SC/ST किसान:** 70% से 85% सहायता\n\n📋 **आवश्यक दस्तावेज:**\n${sch.required_documents_en.map((d, i) => `${i + 1}. ${d}`).join('\n')}\n\n🌐 **आवेदन:** ggrc.co.in या ikhedut.gujarat.gov.in पर करें।`;
+      } else {
+        responseText = `💧 **${sch.name_en}**\n*(સૂક્ષ્મ પિયત પદ્ધતિ સહાય - ટપક અને ફુવારા યોજના)*\n\nHello **${farmerName}**! Yes, the Government of Gujarat provides a dedicated subsidy scheme for **Drip and Sprinkler Irrigation** via GGRC and the iKhedut portal.\n\nBased on your profile in **${farmerDistrict}** with **${farmerLand} acres** of land (${farmerCaste} category), you are eligible for **${sch.subsidy_percentage}** subsidy (capped at **₹${sch.max_subsidy_amount.toLocaleString('en-IN')}**).\n\n💰 **Subsidy Allocation:**\n• **General Farmers:** 55% of total unit cost\n• **Small & Marginal Farmers (< 2 Hectares / 5 Acres):** 70% of total unit cost\n• **SC / ST / Tribal Farmers:** Up to 70% to 85% assistance\n\n✅ **Key Eligibility Criteria:**\n${sch.eligibility_criteria_en.map((e, i) => `• ${e}`).join('\n')}\n\n📋 **Required Documents:**\n${sch.required_documents_en.map((d, i) => `${i + 1}. ${d}`).join('\n')}\n\n🌐 **How to Apply:** Apply online via the Gujarat Green Revolution Company portal (ggrc.co.in) or iKhedut (ikhedut.gujarat.gov.in).`;
+      }
     } else {
-      responseText = `🌾 **${sch.name_en}**\n\nHello **${farmerName}**! Eligible subsidy under this scheme is **${sch.subsidy_percentage}** (Maximum cap **₹${sch.max_subsidy_amount.toLocaleString('en-IN')}**).\n\n📋 **Required Documents:**\n${sch.required_documents_en.map((d, i) => `${i + 1}. ${d}`).join('\n')}\n\n✅ **Eligibility Criteria:**\n${sch.eligibility_criteria_en.map((e, i) => `• ${e}`).join('\n')}\n\n🌐 **Portal:** Apply at ikhedut.gujarat.gov.in.`;
+      // General Scheme template
+      if (lang === 'gu') {
+        responseText = `🌾 **${sch.name_gu}**\n\nનમસ્તે **${farmerName}**! તમારી **${farmerDistrict}** જિલ્લાની **${farmerLand} એકર** જમીન અને **${farmerCaste}** કેટેગરી મુજબ આ યોજના હેઠળ તમને **${sch.subsidy_percentage}** સુધી સહાય (મહત્તમ **₹${sch.max_subsidy_amount.toLocaleString('en-IN')}**) મળવાપાત્ર છે.\n\n📋 **જરૂરી કાગળો:**\n${sch.required_documents_gu.map((d, i) => `${i + 1}. ${d}`).join('\n')}\n\n✅ **પાત્રતા માપદંડ:**\n${sch.eligibility_criteria_gu.map((e, i) => `• ${e}`).join('\n')}\n\n🌐 **અરજી:** આઈ-ખેડૂત પોર્ટલ (ikhedut.gujarat.gov.in) પર ઓનલાઈન અરજી કરવી.`;
+      } else if (lang === 'hi') {
+        responseText = `🌾 **${sch.name_hi || sch.name_en}**\n\nनमस्ते **${farmerName}**! इस योजना के तहत आपको **${sch.subsidy_percentage}** तक (अधिकतम **₹${sch.max_subsidy_amount.toLocaleString('en-IN')}**) सहायता प्राप्त हो सकती है।\n\n📋 **आवश्यक दस्तावेज:**\n${sch.required_documents_en.map((d, i) => `${i + 1}. ${d}`).join('\n')}\n\n🌐 ऑनलाइन आवेदन ikhedut.gujarat.gov.in पर करें।`;
+      } else {
+        responseText = `🌾 **${sch.name_en}**\n\nHello **${farmerName}**! Eligible subsidy under this scheme is **${sch.subsidy_percentage}** (Maximum cap **₹${sch.max_subsidy_amount.toLocaleString('en-IN')}**).\n\n📋 **Required Documents:**\n${sch.required_documents_en.map((d, i) => `${i + 1}. ${d}`).join('\n')}\n\n✅ **Eligibility Criteria:**\n${sch.eligibility_criteria_en.map((e, i) => `• ${e}`).join('\n')}\n\n🌐 **Portal:** Apply at ikhedut.gujarat.gov.in.`;
+      }
     }
+
+    return {
+      response_text: responseText,
+      language: lang,
+      matched_schemes: [sch],
+      citations: [sch.name_gu, 'આઈ-ખેડૂત પોર્ટલ સત્તાવાર નિયમાવલી'],
+      intent: 'scheme_inquiry',
+      show_category_chips: false
+    };
+  }
+
+  // 9. Default Fallback
+  let defaultText = '';
+  if (lang === 'gu') {
+    defaultText = `નમસ્તે **${farmerName}**! આઈ-ખેડૂત પોર્ટલ પર ખેતીવાડી (ટ્રેક્ટર), ટપક સિંચાઈ (ડ્રિપ ઇરિગેશન - ૭૦% સહાય), કાંટાળી તાર વાડ, દેશી ગાય નિભાવ ખર્ચ (માસિક ₹૯૦૦), સોલાર પંપ અને ડ્રોન છંટકાવ જેવી વિવિધ યોજનાઓ ઉપલબ્ધ છે. તમને કઈ યોજના વિશે વિગતવાર માહિતી જોઈએ છે?`;
   } else {
-    if (lang === 'gu') {
-      responseText = `નમસ્તે **${farmerName}**! આઈ-ખેડૂત પોર્ટલ પર ખેતીવાડી (ટ્રેક્ટર), ટપક પિયત (૭૦% સહાય), કાંટાળી તાર વાડ, દેશી ગાય નિભાવ ખર્ચ (માસિક ₹૯૦૦), ડ્રોન છંટકાવ અને સ્માર્ટફોન સહાય જેવી વિવિધ યોજનાઓ ઉપલબ્ધ છે. તમને કઈ યોજના વિશે વિગતવાર માહિતી જોઈએ છે?`;
-    } else {
-      responseText = `Hello **${farmerName}**! iKhedut Portal provides financial assistance for Tractors (up to ₹60k), Drip Irrigation (up to 70%), Barbed Wire Fencing, Desi Cow maintenance (₹900/month), Ag Drones, and Smartphones. Which scheme would you like guidance on?`;
-    }
+    defaultText = `Hello **${farmerName}**! iKhedut Portal provides financial assistance for Tractors (up to ₹60k), Drip Irrigation (up to 70%), Barbed Wire Fencing, Desi Cow maintenance (₹900/month), Solar Pumps, and Agricultural Drones. Which scheme would you like guidance on?`;
   }
 
   return {
-    response_text: responseText,
+    response_text: defaultText,
     language: lang,
-    matched_schemes: matched.length > 0 ? [matched[0]] : [IKHEDUT_SCHEMES[0]],
-    citations: matched.map(m => m.name_gu),
-    intent: 'scheme_inquiry'
+    matched_schemes: [IKHEDUT_SCHEMES[0]],
+    citations: ['iKhedut Directory'],
+    intent: 'scheme_inquiry',
+    show_category_chips: false
   };
 }

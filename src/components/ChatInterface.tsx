@@ -24,7 +24,14 @@ interface ChatInterfaceProps {
   language: Language;
   farmerProfile: FarmerProfile;
   currentlyPlayingAudioId: string | null;
-  onSendMessage: (text: string, isVoice?: boolean, imageDataUrl?: string, imageMimeType?: string) => void;
+  onSendMessage: (
+    text: string,
+    isVoice?: boolean,
+    imageDataUrl?: string,
+    imageMimeType?: string,
+    audioBase64?: string,
+    audioMimeType?: string
+  ) => void;
   onClearChat: () => void;
   onPlayAudio: (id: string, text: string, audioBase64?: string) => void;
   onStopAudio: () => void;

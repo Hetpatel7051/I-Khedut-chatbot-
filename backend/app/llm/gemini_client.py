@@ -99,12 +99,19 @@ async def process_chat(message: str, profile: Dict[str, Any], language: str = "g
         farmer_land = profile.get("land_size", "2")
         farmer_caste = profile.get("category", "General")
         
-        if "hello" in message.lower() or "નમસ્તે" in message.lower():
+        import re
+        is_drip = re.search(r'(drip|sprinkler|irrigation|ટપક|સિંચાઈ|ફુવારા|સૂક્ષ્મ પિયત|પિયત)', message.lower())
+        if is_drip:
+            if language == "gu":
+                return f"💧 **સૂક્ષ્મ પિયત પદ્ધતિ સહાય (ટપક અને ફુવારા પિયત યોજના - GGRC):**\n\nનમસ્તે **{farmer_name}**! હા, ગુજરાત સરકાર દ્વારા ટપક અને ફુવારા પિયત પદ્ધતિ માટે **૫૫% થી ૭૦%** સબસિડી (મહત્તમ **₹૧,૦૦,૦૦૦** સુધી) સહાય મળવાપાત્ર છે.\n\n• **પાત્રતા:** ખેતીલાયક જમીન અને પાણીનો ખાતરીપૂર્વક સ્ત્રોત (બોરવેલ/કૂવો) તેમજ વીજ જોડાણ અથવા સોલાર પંપ હોવો જરૂરી.\n• **જરૂરી કાગળો:** ૭/૧૨, ૮-અ, આધાર કાર્ડ, બેંક પાસબુક અને GGRC માન્ય કંપનીનું એસ્ટીમેટ.\n• **અરજી:** GGRC પોર્ટલ (ggrc.co.in) અથવા ikhedut.gujarat.gov.in પર ઓનલાઈન અરજી કરવી."
+            return f"💧 **Micro Irrigation Scheme (Drip & Sprinkler Subsidy - GGRC):**\n\nHello **{farmer_name}**! Yes, the Government of Gujarat provides a dedicated **50% to 70%** subsidy (up to **₹1,00,000**) for Drip and Sprinkler irrigation systems.\n\n• **Eligibility:** All landholding farmers with an assured water source (borewell/well/canal) and electricity or solar pump.\n• **Documents:** 7/12 & 8-A land records, Aadhaar Card, Bank passbook.\n• **How to Apply:** Apply online via ggrc.co.in or ikhedut.gujarat.gov.in."
+
+        is_pure_greeting = re.search(r'^(hello|hi|hey|નમસ્તે|હાય|kem cho|કેમ છો|good morning|good evening|સુપ્રભાત)(\s|$|\?|\.|!|,)', message.strip().lower())
+        if is_pure_greeting:
             if language == "gu":
                 return f"🙏 **નમસ્તે {farmer_name}! આઈ-ખેડૂત પોર્ટલ AI સહાયકમાં તમારું સ્વાગત છે.**\n\nતમે કયા વિભાગની યોજનાઓ જોવા માંગો છો? નીચે આપેલા સત્તાવાર કેટેગરી બટન પર ક્લિક કરીને માહિતી મેળવી શકો છો:"
             return f"🙏 **Hello {farmer_name}! Welcome to the iKhedut Portal Assistant.**\n\nWhich department schemes would you like to explore? Please select a category below:"
         
-        import re
         if re.search(r'(^|\s)(market|mandi|ભાવ|bhav)(\s|$|\?|\.|,)', message.lower()):
             if language == "gu":
                 return f"📊 **તાજા ગુજરાત APMC બજાર ભાવ (આજના તાજા ભાવ):**\n\n• **જીરું:** ₹4800 થી ₹5950 / ૨૦ કિગ્રા - *ઊંઝા માર્કેટ યાર્ડ*\n• **કપાસ (શંકર-6):** ₹1400 થી ₹1685 / ૨૦ કિગ્રા - *ગોંડલ માર્કેટ યાર્ડ*\n\n💡 **બજાર સલાહ:** સૂકા અને ગ્રેડિંગ કરેલા માલના ઊંચા ભાવ મળે છે. સંપૂર્ણ યાદી નીચે આપેલા કાર્ડમાં જોઈ શકો છો."
