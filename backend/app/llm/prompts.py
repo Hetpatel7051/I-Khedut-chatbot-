@@ -1,18 +1,32 @@
-from typing import Dict, Any
+from pathlib import Path
+from typing import Any, Dict
 import json
-import os
+
 
 def get_system_prompt(profile: Dict[str, Any], language: str = "gu") -> str:
-    farmer_name = profile.get("name", "ખેડૂત મિત્ર")
-    farmer_district = profile.get("district", "ગુજરાત")
-    farmer_land = profile.get("land_size", "2")
-    farmer_caste = profile.get("category", "General")
-    
+    farmer_name = profile.get("name") or "ખેડૂત મિત્ર"
+    farmer_district = profile.get("district")
+    farmer_land = profile.get("land_size_acres", profile.get("land_size"))
+    farmer_caste = profile.get("caste_category", profile.get("category"))
+    profile_details = []
+    if farmer_district:
+        profile_details.append(f"District: {farmer_district}")
+    if farmer_land is not None:
+        profile_details.append(f"Landholding: {farmer_land} acres")
+    if farmer_caste:
+        profile_details.append(f"Category: {farmer_caste}")
+    profile_summary = "; ".join(profile_details) or "No farmer details provided"
+
     # Load schemes data to inject into prompt
     schemes_text = ""
     try:
-        schemes_path = os.path.join(os.getcwd(), "data_pipeline", "sample_data", "ikhedut_schemes.json")
-        if os.path.exists(schemes_path):
+        schemes_path = (
+            Path(__file__).resolve().parents[3]
+            / "data_pipeline"
+            / "sample_data"
+            / "ikhedut_schemes.json"
+        )
+        if schemes_path.exists():
             with open(schemes_path, "r", encoding="utf-8") as f:
                 schemes_data = json.load(f)
                 for s in schemes_data:
@@ -20,24 +34,21 @@ def get_system_prompt(profile: Dict[str, Any], language: str = "gu") -> str:
     except Exception as e:
         print("Could not load schemes for prompt:", e)
         pass
-    
-    prompt = f"""You are an expert Agricultural AI Assistant for the iKhedut Portal in Gujarat.
-You are helping a farmer named {farmer_name} from {farmer_district} district, with {farmer_land} acres of land ({farmer_caste} category).
 
-Your goal is to provide accurate information about Gujarat government schemes and live Mandi/APMC crop prices.
+    prompt = f"""You are an agricultural information assistant for Gujarat farmers using the iKhedut portal.
+Respond in the user's requested language: {language}. Address the farmer respectfully as {farmer_name}.
+Known profile details: {profile_summary}.
 
-Here are the available schemes on the portal you can recommend:
+The following is a bundled local reference catalog, not a live or independently verified government feed:
 {schemes_text}
 
-When the user asks about crop prices, rates, or mandi data (e.g. "આજે ઊંઝા માર્કેટમાં જીરુંનો ભાવ શું છે?"):
-1. ALWAYS use the `get_mandi_prices` tool to fetch real-time data.
-2. Format your final response in clear {language} text.
-3. Include:
-   - Market Name & Commodity
-   - Minimum, Maximum, and Modal (સરેરાશ) price per 20 kg (મણ) and Quintal
-   - Date of price update
-   - Any alert if it's the previous day's closing rate (e.g., "⚠️ આજના તાજા ભાવ હજુ અપડેટ નથી થયા, આ ગઈકાલના બંધ ભાવ છે.")
-   - A short text-to-speech friendly summary at the end.
-4. Keep the tone respectful and helpful (e.g. નમસ્તે {farmer_name}).
+Accuracy rules:
+- You may summarize catalog entries as catalog information, but say that rates, criteria, documents, and application periods must be confirmed on the current iKhedut portal or with the responsible department.
+- Never say that the farmer is eligible, approved, verified, or guaranteed to receive a subsidy based only on profile details or this catalog.
+- No live APMC price feed, weather provider, or application-status service is connected. For these requests, say current data cannot be retrieved. Do not estimate, reuse sample values, infer a status from an ID, or claim to have called an official source.
+- No official source documents are supplied to you. Do not invent citations, official bulletins, or source attributions.
+- If an image is supplied, describe only what is visibly readable. Do not certify authenticity, government validity, or application eligibility. If uncertain, say so plainly.
+- If information is missing or contradictory, ask a clarifying question instead of filling gaps with assumptions.
+- Keep responses concise, respectful, and clear.
 """
     return prompt

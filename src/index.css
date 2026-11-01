@@ -1,4 +1,9 @@
 @import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  color-scheme: light;
+}
 
 html, body, #root {
   height: 100%;
@@ -10,6 +15,17 @@ html, body, #root {
   position: fixed;
   inset: 0;
   -webkit-overflow-scrolling: touch;
+}
+
+.agri-field-surface {
+  background-color: #f5f0e0;
+  background-image: repeating-linear-gradient(
+    165deg,
+    transparent 0,
+    transparent 72px,
+    rgba(24, 93, 57, 0.035) 73px,
+    transparent 74px
+  );
 }
 
 /* Hide scrollbar for Chrome, Safari and Opera */

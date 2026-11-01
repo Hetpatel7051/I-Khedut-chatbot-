@@ -1,20 +1,20 @@
-import React, { useState, useMemo } from 'react';
-import confetti from 'canvas-confetti';
-import { IKHEDUT_SCHEMES } from '../data/schemes';
-import { Scheme, Language, FarmerProfile } from '../types';
-import { 
-  Calculator, 
-  Coins, 
-  Sparkles, 
-  Percent, 
-  ShieldAlert, 
-  CheckCircle2, 
-  X, 
-  FileText, 
+import React, { useState, useMemo } from "react";
+import confetti from "canvas-confetti";
+import { IKHEDUT_SCHEMES } from "../data/schemes";
+import { Scheme, Language, FarmerProfile } from "../types";
+import {
+  Calculator,
+  Coins,
+  Sparkles,
+  Percent,
+  ShieldAlert,
+  CheckCircle2,
+  X,
+  FileText,
   ExternalLink,
   ArrowRight,
-  TrendingDown
-} from 'lucide-react';
+  TrendingDown,
+} from "lucide-react";
 
 interface EligibilityCalculatorProps {
   isOpen: boolean;
@@ -29,17 +29,25 @@ export const EligibilityCalculator: React.FC<EligibilityCalculatorProps> = ({
   onClose,
   farmerProfile,
   language,
-  onAskAIAboutScheme
+  onAskAIAboutScheme,
 }) => {
-  const [selectedSchemeId, setSelectedSchemeId] = useState<string>(IKHEDUT_SCHEMES[0].id);
+  const [selectedSchemeId, setSelectedSchemeId] = useState<string>(
+    IKHEDUT_SCHEMES[0].id,
+  );
   const [estimatedCost, setEstimatedCost] = useState<number>(120000);
-  const [caste, setCaste] = useState<string>(farmerProfile.caste_category || 'General');
-  const [isWomanFarmer, setIsWomanFarmer] = useState<boolean>(farmerProfile.farmer_type === 'women');
-  const [landAcres, setLandAcres] = useState<number>(farmerProfile.land_size_acres || 3.0);
+  const [caste, setCaste] = useState<string>(
+    farmerProfile.caste_category || "General",
+  );
+  const [isWomanFarmer, setIsWomanFarmer] = useState<boolean>(
+    farmerProfile.farmer_type === "women",
+  );
+  const [landAcres, setLandAcres] = useState<number>(
+    farmerProfile.land_size_acres || 3.0,
+  );
 
-  if (!isOpen) return null;
-
-  const activeScheme = IKHEDUT_SCHEMES.find(s => s.id === selectedSchemeId) || IKHEDUT_SCHEMES[0];
+  const activeScheme =
+    IKHEDUT_SCHEMES.find((s) => s.id === selectedSchemeId) ||
+    IKHEDUT_SCHEMES[0];
 
   // Dynamic Subsidy Math Engine
   const calculation = useMemo(() => {
@@ -47,10 +55,10 @@ export const EligibilityCalculator: React.FC<EligibilityCalculatorProps> = ({
     let percentageLabel = "25%";
     let maxCap = activeScheme.max_subsidy_amount;
 
-    if (activeScheme.id === 'ikhedut-sch-001') {
+    if (activeScheme.id === "ikhedut-sch-001") {
       // Tractor
-      if (caste === 'SC' || caste === 'ST' || isWomanFarmer) {
-        percentage = 0.50;
+      if (caste === "SC" || caste === "ST" || isWomanFarmer) {
+        percentage = 0.5;
         percentageLabel = "50%";
         maxCap = 60000;
       } else if (landAcres <= 5) {
@@ -62,48 +70,48 @@ export const EligibilityCalculator: React.FC<EligibilityCalculatorProps> = ({
         percentageLabel = "25%";
         maxCap = 45000;
       }
-    } else if (activeScheme.id === 'ikhedut-sch-002') {
+    } else if (activeScheme.id === "ikhedut-sch-002") {
       // Drip / Sprinkler GGRC
-      if (caste === 'SC' || caste === 'ST' || isWomanFarmer || landAcres <= 5) {
-        percentage = 0.70;
+      if (caste === "SC" || caste === "ST" || isWomanFarmer || landAcres <= 5) {
+        percentage = 0.7;
         percentageLabel = "70%";
       } else {
-        percentage = 0.50;
+        percentage = 0.5;
         percentageLabel = "50%";
       }
       maxCap = 100000;
-    } else if (activeScheme.id === 'ikhedut-sch-003') {
+    } else if (activeScheme.id === "ikhedut-sch-003") {
       // Barbed wire fencing
-      percentage = 0.50;
+      percentage = 0.5;
       percentageLabel = "50%";
       maxCap = 40000;
-    } else if (activeScheme.id === 'ikhedut-sch-004') {
+    } else if (activeScheme.id === "ikhedut-sch-004") {
       // Desi Gau Sahay
       percentage = 1.0;
       percentageLabel = "100% Monthly DBT";
       maxCap = 10800; // 900 * 12
-    } else if (activeScheme.id === 'ikhedut-sch-005') {
+    } else if (activeScheme.id === "ikhedut-sch-005") {
       // Drone
-      if (caste === 'SC' || caste === 'ST' || isWomanFarmer) {
+      if (caste === "SC" || caste === "ST" || isWomanFarmer) {
         percentage = 0.75;
         percentageLabel = "75%";
       } else {
-        percentage = 0.50;
+        percentage = 0.5;
         percentageLabel = "50%";
       }
       maxCap = 500000;
-    } else if (activeScheme.id === 'ikhedut-sch-006') {
+    } else if (activeScheme.id === "ikhedut-sch-006") {
       // Smartphone
-      percentage = 0.40;
+      percentage = 0.4;
       percentageLabel = "40%";
       maxCap = 6000;
-    } else if (activeScheme.id === 'ikhedut-sch-007') {
+    } else if (activeScheme.id === "ikhedut-sch-007") {
       // Solar pump PM-KUSUM
-      percentage = (caste === 'SC' || caste === 'ST') ? 0.75 : 0.60;
-      percentageLabel = (caste === 'SC' || caste === 'ST') ? "75%" : "60%";
+      percentage = caste === "SC" || caste === "ST" ? 0.75 : 0.6;
+      percentageLabel = caste === "SC" || caste === "ST" ? "75%" : "60%";
       maxCap = 150000;
     } else {
-      percentage = 0.50;
+      percentage = 0.5;
       percentageLabel = "50%";
       maxCap = activeScheme.max_subsidy_amount;
     }
@@ -117,15 +125,17 @@ export const EligibilityCalculator: React.FC<EligibilityCalculatorProps> = ({
       percentageVal: percentage * 100,
       maxCap,
       finalGovSubsidy,
-      farmerPayable
+      farmerPayable,
     };
   }, [activeScheme, estimatedCost, caste, isWomanFarmer, landAcres]);
+
+  if (!isOpen) return null;
 
   const handleTriggerConfetti = () => {
     confetti({
       particleCount: 80,
       spread: 70,
-      origin: { y: 0.6 }
+      origin: { y: 0.6 },
     });
   };
 
@@ -133,23 +143,29 @@ export const EligibilityCalculator: React.FC<EligibilityCalculatorProps> = ({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="relative w-full max-w-2xl bg-white dark:bg-stone-900 rounded-2xl shadow-2xl border border-stone-200 dark:border-stone-800 overflow-hidden max-h-[92vh] flex flex-col">
         {/* Header */}
-        <div className="bg-gradient-to-r from-amber-500 to-amber-600 px-6 py-4 text-emerald-950 flex items-center justify-between">
+        <div className="bg-emerald-800 px-6 py-4 text-white flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-emerald-950 text-amber-400 flex items-center justify-center font-black shadow-inner">
+            <div className="w-9 h-9 rounded-lg bg-white/15 text-white flex items-center justify-center font-black">
               <Calculator className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="font-extrabold text-base sm:text-lg text-emerald-950">
-                {language === 'gu' ? 'આઈ-ખેડૂત સબસિડી કેલ્ક્યુલેટર (Subsidy Calculator)' : 'iKhedut Subsidy Calculator'}
+              <h2 className="font-extrabold text-base sm:text-lg text-white">
+                {language === "gu"
+                  ? "આઈ-ખેડૂત સબસિડી કેલ્ક્યુલેટર (Subsidy Calculator)"
+                  : "iKhedut Subsidy Calculator"}
               </h2>
-              <p className="text-xs text-emerald-950/80 font-medium">
-                {language === 'gu' ? 'તમારા સાધન અથવા યોજનાની સચોટ સરકારી સહાય ગણો' : 'Calculate exact government grant and your net share'}
+              <p className="text-xs text-emerald-100 font-medium">
+                {language === "gu"
+                  ? "સંદર્ભ દર પરથી અંદાજ મેળવો"
+                  : language === "hi"
+                    ? "संदर्भ दरों से अनुमान देखें"
+                    : "Estimate from reference rates"}
               </p>
             </div>
           </div>
-          <button 
+          <button
             onClick={onClose}
-            className="p-1 rounded-lg text-emerald-950 hover:bg-black/10 transition-colors"
+            className="p-1 rounded-lg text-white hover:bg-white/10 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -157,6 +173,14 @@ export const EligibilityCalculator: React.FC<EligibilityCalculatorProps> = ({
 
         {/* Body */}
         <div className="p-6 overflow-y-auto space-y-5 text-xs sm:text-sm">
+          <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs leading-relaxed text-stone-700">
+            {language === "gu"
+              ? "આ અંદાજ સ્થાનિક સંદર્ભ કેટલોગ પર આધારિત છે, સત્તાવાર કે હાલના દરોની પુષ્ટિ નથી. અંતિમ સહાય અને પાત્રતા સંબંધિત વિભાગ નક્કી કરે છે."
+              : language === "hi"
+                ? "यह अनुमान स्थानीय संदर्भ सूची पर आधारित है, वर्तमान आधिकारिक दरों की पुष्टि नहीं। अंतिम सहायता और पात्रता संबंधित विभाग तय करता है।"
+                : "This estimate uses the local reference catalog and does not confirm current official rates. The responsible department determines final assistance and eligibility."}
+          </div>
+
           {/* 1. Scheme Selector */}
           <div>
             <label className="block font-bold text-stone-900 dark:text-stone-100 mb-1.5">
@@ -166,12 +190,14 @@ export const EligibilityCalculator: React.FC<EligibilityCalculatorProps> = ({
               value={selectedSchemeId}
               onChange={(e) => {
                 setSelectedSchemeId(e.target.value);
-                const s = IKHEDUT_SCHEMES.find(item => item.id === e.target.value);
+                const s = IKHEDUT_SCHEMES.find(
+                  (item) => item.id === e.target.value,
+                );
                 if (s) {
-                  if (s.id === 'ikhedut-sch-001') setEstimatedCost(150000);
-                  else if (s.id === 'ikhedut-sch-002') setEstimatedCost(80000);
-                  else if (s.id === 'ikhedut-sch-004') setEstimatedCost(10800);
-                  else if (s.id === 'ikhedut-sch-006') setEstimatedCost(14000);
+                  if (s.id === "ikhedut-sch-001") setEstimatedCost(150000);
+                  else if (s.id === "ikhedut-sch-002") setEstimatedCost(80000);
+                  else if (s.id === "ikhedut-sch-004") setEstimatedCost(10800);
+                  else if (s.id === "ikhedut-sch-006") setEstimatedCost(14000);
                   else setEstimatedCost(s.max_subsidy_amount * 2);
                 }
               }}
@@ -179,7 +205,8 @@ export const EligibilityCalculator: React.FC<EligibilityCalculatorProps> = ({
             >
               {IKHEDUT_SCHEMES.map((sch) => (
                 <option key={sch.id} value={sch.id}>
-                  {sch.name_gu} ({sch.category_gu}) - Max ₹{sch.max_subsidy_amount.toLocaleString('en-IN')}
+                  {sch.name_gu} ({sch.category_gu}) - Max ₹
+                  {sch.max_subsidy_amount.toLocaleString("en-IN")}
                 </option>
               ))}
             </select>
@@ -197,7 +224,9 @@ export const EligibilityCalculator: React.FC<EligibilityCalculatorProps> = ({
                 step="1000"
                 min="1000"
                 value={estimatedCost}
-                onChange={(e) => setEstimatedCost(Math.max(0, parseInt(e.target.value) || 0))}
+                onChange={(e) =>
+                  setEstimatedCost(Math.max(0, parseInt(e.target.value) || 0))
+                }
                 className="w-full px-2.5 py-1.5 rounded-lg border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-800 font-extrabold text-stone-900 dark:text-stone-100 outline-none"
               />
             </div>
@@ -244,12 +273,14 @@ export const EligibilityCalculator: React.FC<EligibilityCalculatorProps> = ({
                 onChange={(e) => setIsWomanFarmer(e.target.checked)}
                 className="rounded text-amber-500 focus:ring-amber-400 w-4 h-4"
               />
-              <span>મહિલા ખાતેદાર છે (Woman Farmer - Eligible for maximum slab)</span>
+              <span>
+                મહિલા ખાતેદાર છે (Woman Farmer - Eligible for maximum slab)
+              </span>
             </label>
           </div>
 
           {/* 3. Output Result Summary Card */}
-          <div className="bg-gradient-to-br from-emerald-900 to-teal-900 text-white p-5 rounded-2xl shadow-lg border border-emerald-700 relative overflow-hidden">
+          <div className="bg-linear-to-br from-emerald-900 to-teal-900 text-white p-5 rounded-2xl shadow-lg border border-emerald-700 relative overflow-hidden">
             <div className="absolute top-0 right-0 p-4 opacity-10">
               <Coins className="w-32 h-32" />
             </div>
@@ -257,13 +288,13 @@ export const EligibilityCalculator: React.FC<EligibilityCalculatorProps> = ({
             <div className="relative z-10 space-y-4">
               <div className="flex flex-wrap items-center justify-between gap-2 border-b border-emerald-700/80 pb-3">
                 <div>
-                  <div className="text-xs font-medium text-emerald-300">
+                  <div className="text-xs font-medium text-white/85">
                     લાગુ પડતી સબસિડી ટકાવારી (Applicable Slab):
                   </div>
-                  <div className="text-xl font-black text-amber-400 flex items-center gap-1.5">
+                  <div className="text-xl font-black text-white flex items-center gap-1.5">
                     <span>{calculation.percentageLabel}</span>
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-800 text-emerald-200 border border-emerald-600">
-                      મહત્તમ કેપ: ₹{calculation.maxCap.toLocaleString('en-IN')}
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-800 text-white border border-white/20">
+                      મહત્તમ કેપ: ₹{calculation.maxCap.toLocaleString("en-IN")}
                     </span>
                   </div>
                 </div>
@@ -271,7 +302,7 @@ export const EligibilityCalculator: React.FC<EligibilityCalculatorProps> = ({
                 <button
                   type="button"
                   onClick={handleTriggerConfetti}
-                  className="px-3 py-1 rounded-lg bg-amber-500 hover:bg-amber-400 text-emerald-950 font-bold text-xs flex items-center gap-1 shadow-sm active:scale-95"
+                  className="px-3 py-1 rounded-lg bg-emerald-700 hover:bg-emerald-600 text-white font-bold text-xs flex items-center gap-1 active:scale-95"
                 >
                   <Sparkles className="w-3.5 h-3.5" />
                   <span>અભિનંદન!</span>
@@ -281,25 +312,25 @@ export const EligibilityCalculator: React.FC<EligibilityCalculatorProps> = ({
               {/* Two Big Metric Cards */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="bg-emerald-950/60 p-3.5 rounded-xl border border-emerald-600/50">
-                  <div className="text-xs text-emerald-300 font-medium">
+                  <div className="text-xs text-white/85 font-medium">
                     ગુજરાત સરકાર સબસિડી સહાય (Government Subsidy):
                   </div>
-                  <div className="text-2xl font-extrabold text-emerald-400 mt-1">
-                    ₹{calculation.finalGovSubsidy.toLocaleString('en-IN')}
+                  <div className="text-2xl font-extrabold text-white mt-1">
+                    ₹{calculation.finalGovSubsidy.toLocaleString("en-IN")}
                   </div>
-                  <div className="text-[10px] text-emerald-300/80 mt-0.5">
+                  <div className="text-[10px] text-white/75 mt-0.5">
                     (સીધી ડીબીટી દ્વારા બેંક ખાતામાં જમા)
                   </div>
                 </div>
 
                 <div className="bg-emerald-950/60 p-3.5 rounded-xl border border-emerald-600/50">
-                  <div className="text-xs text-emerald-300 font-medium">
+                  <div className="text-xs text-white/85 font-medium">
                     ખેડૂતનો પોતાનો હિસ્સો (Farmer Net Contribution):
                   </div>
-                  <div className="text-2xl font-extrabold text-amber-300 mt-1">
-                    ₹{calculation.farmerPayable.toLocaleString('en-IN')}
+                  <div className="text-2xl font-extrabold text-white mt-1">
+                    ₹{calculation.farmerPayable.toLocaleString("en-IN")}
                   </div>
-                  <div className="text-[10px] text-emerald-300/80 mt-0.5">
+                  <div className="text-[10px] text-white/75 mt-0.5">
                     (સાધન ખરીદી વખતે ચૂકવવાનો ભાગ)
                   </div>
                 </div>

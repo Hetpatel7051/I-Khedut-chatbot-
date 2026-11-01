@@ -1,16 +1,16 @@
-import React, { useState } from 'react';
-import { Header } from './components/Header';
-import { ChatInterface } from './components/ChatInterface';
-import { FarmerProfileModal } from './components/FarmerProfileModal';
-import { EligibilityCalculator } from './components/EligibilityCalculator';
-import { DocumentChecklistModal } from './components/DocumentChecklistModal';
-import { QuickSchemeDrawer } from './components/QuickSchemeDrawer';
-import { MarketPricesModal } from './components/MarketPricesModal';
-import { NewSchemesNotificationModal } from './components/NewSchemesNotificationModal';
-import { OfflineStatusBanner } from './components/OfflineStatusBanner';
-import { useChat } from './hooks/useChat';
-import { useNetworkStatus } from './hooks/useNetworkStatus';
-import { Scheme } from './types';
+import React, { useState } from "react";
+import { Header } from "./components/Header";
+import { ChatInterface } from "./components/ChatInterface";
+import { FarmerProfileModal } from "./components/FarmerProfileModal";
+import { EligibilityCalculator } from "./components/EligibilityCalculator";
+import { DocumentChecklistModal } from "./components/DocumentChecklistModal";
+import { QuickSchemeDrawer } from "./components/QuickSchemeDrawer";
+import { MarketPricesModal } from "./components/MarketPricesModal";
+import { NewSchemesNotificationModal } from "./components/NewSchemesNotificationModal";
+import { OfflineStatusBanner } from "./components/OfflineStatusBanner";
+import { useChat } from "./hooks/useChat";
+import { useNetworkStatus } from "./hooks/useNetworkStatus";
+import { Scheme } from "./types";
 
 export function App() {
   const {
@@ -24,7 +24,7 @@ export function App() {
     clearChat,
     currentlyPlayingAudioId,
     playAudio,
-    stopAudioPlayback
+    stopAudioPlayback,
   } = useChat();
 
   const { isOnline } = useNetworkStatus();
@@ -34,18 +34,22 @@ export function App() {
   const [isSchemesDrawerOpen, setIsSchemesDrawerOpen] = useState(false);
   const [isPricesModalOpen, setIsPricesModalOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
-  const [activeChecklistScheme, setActiveChecklistScheme] = useState<Scheme | null>(null);
+  const [activeChecklistScheme, setActiveChecklistScheme] =
+    useState<Scheme | null>(null);
 
   const handleOpenChecklist = (scheme: Scheme) => {
     setActiveChecklistScheme(scheme);
   };
 
   const handleAskAIAboutScheme = (schemeName: string) => {
-    sendMessage(`મને ${schemeName} યોજનાની સબસિડી, પાત્રતા અને ૭/૧૨ કાગળોની વિગતવાર માહિતી આપો.`, false);
+    sendMessage(
+      `મને ${schemeName} યોજનાની સબસિડી, પાત્રતા અને ૭/૧૨ કાગળોની વિગતવાર માહિતી આપો.`,
+      false,
+    );
   };
 
   return (
-    <div className="flex flex-col h-[100dvh] h-screen w-full bg-stone-100 dark:bg-stone-950 font-sans antialiased text-stone-900 dark:text-stone-100 overflow-hidden fixed inset-0">
+    <div className="flex flex-col h-dvh w-full bg-[#f5f0e0] font-sans antialiased text-stone-900 overflow-hidden fixed inset-0">
       {/* Offline Alert Banner (shown when connection drops or is poor) */}
       <OfflineStatusBanner isOnline={isOnline} language={language} />
 
@@ -53,12 +57,9 @@ export function App() {
       <Header
         language={language}
         onLanguageChange={setLanguage}
-        farmerProfile={farmerProfile}
-        isOnline={isOnline}
         onOpenProfile={() => setIsProfileOpen(true)}
         onOpenCalculator={() => setIsCalculatorOpen(true)}
         onOpenSchemes={() => setIsSchemesDrawerOpen(true)}
-        onOpenChecklist={() => {}}
         onOpenPrices={() => setIsPricesModalOpen(true)}
         onOpenNotifications={() => setIsNotificationsOpen(true)}
       />
@@ -75,7 +76,6 @@ export function App() {
         onPlayAudio={playAudio}
         onStopAudio={stopAudioPlayback}
         onOpenChecklist={handleOpenChecklist}
-        onOpenCalculator={() => setIsCalculatorOpen(true)}
       />
 
       {/* Farmer Profile Editor Modal */}

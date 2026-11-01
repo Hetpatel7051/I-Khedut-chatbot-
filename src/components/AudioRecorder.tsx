@@ -1,6 +1,13 @@
-import React from 'react';
-import { Mic, MicOff, Square, Volume2, Sparkles, AlertCircle } from 'lucide-react';
-import { Language } from '../types';
+import React from "react";
+import {
+  Mic,
+  MicOff,
+  Square,
+  Volume2,
+  Sparkles,
+  AlertCircle,
+} from "lucide-react";
+import { Language } from "../types";
 
 interface AudioRecorderProps {
   isRecording: boolean;
@@ -21,7 +28,7 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({
   language,
   onStartRecording,
   onStopRecording,
-  onCancelRecording
+  onCancelRecording,
 }) => {
   return (
     <div id="audio-recorder-container" className="flex items-center">
@@ -31,14 +38,17 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({
           type="button"
           onClick={onStartRecording}
           disabled={isTranscribing}
-          className="relative group flex items-center justify-center w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-gradient-to-tr from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white shadow-md hover:shadow-lg transition-all active:scale-95 shrink-0"
-          title={language === 'gu' ? 'બોલીને પ્રશ્ન પૂછો (Voice Query)' : 'Record your voice query'}
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-700 text-white transition-colors hover:bg-emerald-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700"
+          title={
+            language === "gu"
+              ? "બોલીને પ્રશ્ન પૂછો (Voice Query)"
+              : "Record your voice query"
+          }
+          aria-label={
+            language === "gu" ? "બોલીને પ્રશ્ન પૂછો" : "Record a voice query"
+          }
         >
-          <Mic className="w-5 h-5 sm:w-6 sm:h-6 text-white group-hover:scale-110 transition-transform" />
-          
-          {/* Subtle pulse ring indicator */}
-          <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-amber-400 border-2 border-white animate-ping opacity-75"></span>
-          <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-amber-400 border-2 border-white"></span>
+          <Mic className="h-5 w-5" />
         </button>
       ) : (
         <div className="flex items-center gap-2 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800/60 rounded-full px-3 py-1.5 shadow-md animate-in fade-in zoom-in-95 duration-200">
@@ -49,7 +59,11 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({
               <span className="relative inline-flex rounded-full h-3 w-3 bg-red-600"></span>
             </span>
             <span className="text-xs font-bold text-red-700 dark:text-red-300 whitespace-nowrap">
-              {language === 'gu' ? 'સાંભળી રહ્યો છું...' : language === 'hi' ? 'सुन रहा हूँ...' : 'Listening...'}
+              {language === "gu"
+                ? "સાંભળી રહ્યો છું..."
+                : language === "hi"
+                  ? "सुन रहा हूँ..."
+                  : "Listening..."}
             </span>
           </div>
 
@@ -58,7 +72,10 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({
             {[40, 70, 90, 60, 85, 50, 95, 30].map((baseHeight, idx) => {
               const dynamicHeight = Math.max(
                 4,
-                Math.min(24, Math.round((baseHeight * (audioLevel + 20)) / 100))
+                Math.min(
+                  24,
+                  Math.round((baseHeight * (audioLevel + 20)) / 100),
+                ),
               );
               return (
                 <div
