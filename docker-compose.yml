@@ -1,69 +1,30 @@
-version: '3.8'
-
 services:
-  postgres:
-    image: postgres:15-alpine
-    container_name: ikhedut_postgres
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgrespassword
-      POSTGRES_DB: ikhedut_ai
-    ports:
-      - "5432:5432"
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-
-  chromadb:
-    image: chromadb/chroma:latest
-    container_name: ikhedut_chromadb
-    ports:
-      - "8000:8000"
-    volumes:
-      - chromadata:/chroma/chroma
-    environment:
-      - IS_PERSISTENT=TRUE
-      - PERSIST_DIRECTORY=/chroma/chroma
-      - ANONYMIZED_TELEMETRY=FALSE
-
   backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
+    image: python:3.10-slim
     container_name: ikhedut_backend
+    working_dir: /app
+    command: sh -c "pip install --no-cache-dir -r backend/requirements.txt && uvicorn backend.app.main:app --host 0.0.0.0 --port 8000"
     environment:
-      - GEMINI_API_KEY=${GEMINI_API_KEY}
-      - DATABASE_URL=postgresql+asyncpg://postgres:postgrespassword@postgres:5432/ikhedut_ai
-      - CHROMA_PERSIST_DIRECTORY=/app/chroma_db
-      - BHASHINI_API_KEY=${BHASHINI_API_KEY}
-      - BHASHINI_USER_ID=${BHASHINI_USER_ID}
+      - BHASHINI_API_KEY=${BHASHINI_API_KEY:-}
+      - BHASHINI_USER_ID=${BHASHINI_USER_ID:-}
+      - BHASHINI_ASR_SERVICE_ID=${BHASHINI_ASR_SERVICE_ID:-}
+      - BHASHINI_TTS_SERVICE_ID=${BHASHINI_TTS_SERVICE_ID:-}
     ports:
       - "8080:8000"
-    depends_on:
-      postgres:
-        condition: service_healthy
-      chromadb:
-        condition: service_started
     volumes:
-      - ./data_pipeline:/app/data_pipeline
-      - ./backend:/app/backend
+      - .:/app
 
   frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
+    image: node:22-alpine
     container_name: ikhedut_frontend
+    working_dir: /app
+    command: sh -c "npm ci && npx vite --host 0.0.0.0"
     ports:
       - "3000:3000"
     environment:
-      - VITE_API_URL=http://localhost:8080/api/v1
+      - BACKEND_API_URL=http://backend:8000
     depends_on:
       - backend
+    volumes:
+      - .:/app
 
-volumes:
-  pgdata:
-  chromadata:

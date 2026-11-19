@@ -1,19 +1,12 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>My Google AI Studio App</title>
-    <meta name="description" content="An application built with Google AI Studio." />
-    <meta property="og:title" content="My Google AI Studio App" />
-    <meta property="og:description" content="An application built with Google AI Studio." />
-    <meta property="og:type" content="website" />
-    <meta name="twitter:card" content="summary_large_image" />
-    <script type="module" crossorigin src="/assets/index-DzsMIcpa.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-C3pOCnFv.css">
-  </head>
-  <body>
-    <div id="root"></div>
-  </body>
-</html>
+from typing import Any
 
+from backend.app.rag.vector_store import LocalSchemeStore, vector_store
+
+
+def retrieve_schemes(
+    query: str,
+    limit: int = 3,
+    store: LocalSchemeStore = vector_store,
+) -> list[dict[str, Any]]:
+    """Retrieve the most relevant local scheme records for a farmer query."""
+    return store.search(query, limit=limit)

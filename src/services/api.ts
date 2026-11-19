@@ -6,7 +6,6 @@ import {
   Language,
 } from "../types";
 import { IKHEDUT_SCHEMES } from "../data/schemes";
-import { GUJARAT_MARKET_PRICES, searchCropPrices } from "../data/marketPrices";
 import { swManager } from "./serviceWorkerRegistration";
 
 export const API_BASE_URL = "/api/v1";
@@ -172,6 +171,17 @@ function fallbackClientChat(payload: ChatRequestPayload): ChatResponsePayload {
     );
   }
 
+  if (payload.audio_base64 && !query.trim()) {
+    return unavailableResponse(
+      lang === "gu"
+        ? "તમારો અવાજ લખાણમાં ફેરવી શકાયો નથી. કૃપા કરીને ફરી બોલો અથવા તમારો પ્રશ્ન લખો."
+        : lang === "hi"
+          ? "आपकी आवाज़ को पाठ में नहीं बदला जा सका। कृपया फिर बोलें या अपना प्रश्न लिखें।"
+          : "Your speech could not be transcribed. Please try speaking again or type your question.",
+      "transcription_unavailable",
+    );
+  }
+
   const appId = query.match(/ikh-[0-9]{4}-[0-9]{4}/i)?.[0].toUpperCase();
   if (
     query.includes("status") ||
@@ -229,176 +239,7 @@ function fallbackClientChat(payload: ChatRequestPayload): ChatResponsePayload {
     );
   }
 
-  // 1. Multimodal Document Verification (Image present)
-  if (hasImage) {
-    const isSatbara =
-      query.includes("7/12") ||
-      query.includes("સાતબારા") ||
-      query.includes("જમીન") ||
-      !query.includes("આધાર");
-    return {
-      response_text:
-        lang === "gu"
-          ? `🔍 **દસ્તાવેજ ચકાસણી પૂર્ણ (AI Document Verification):**\n\nનમસ્તે **${farmerName}**! તમે અપલોડ કરેલ **${isSatbara ? "૭/૧૨ (Satbara) જમીન રેકોર્ડ" : "આધાર કાર્ડ"}** સફળતાપૂર્વક ચકાસવામાં આવ્યો છે.\n\n• **દસ્તાવેજ પ્રકાર:** ${isSatbara ? "૭/૧૨ અને ૮-અ જમીન ઉતારો" : "ભારતીય આધાર કાર્ડ"}\n• **સ્પષ્ટતા:** સ્પષ્ટ અને વાંચી શકાય તેવું (Clear & Legible)\n• **તારણ:** આ દસ્તાવેજ આઈ-ખેડૂત પોર્ટલ પર સહાય મેળવવા માટે માન્ય છે.`
-          : `🔍 **Document Verification Result:**\n\nHello **${farmerName}**! Your uploaded **${isSatbara ? "Gujarat 7/12 Land Record" : "Aadhaar Card"}** has been scanned and verified. The image is crisp, legible, and valid for iKhedut subsidy applications.`,
-      language: lang,
-      matched_schemes: [IKHEDUT_SCHEMES[0]],
-      citations: ["ગુજરાત મહેસૂલ વિભાગ ૭/૧૨ નિયમાવલી"],
-      intent: "document_verification",
-      verification_result: {
-        is_valid: true,
-        document_type: isSatbara ? "7/12_satbara" : "aadhaar_card",
-        document_name_gu: isSatbara
-          ? "૭/૧૨ જમીન રેકોર્ડ (સાતબારા)"
-          : "આધાર કાર્ડ (Aadhaar Card)",
-        clarity: "clear",
-        extracted_details: {
-          survey_number: "૧૪૨/પૈકી ૨",
-          khata_number: "૮૭૪",
-          farmer_name: farmerName,
-          district_or_taluka: farmerDistrict,
-          aadhaar_masked: "XXXX-XXXX-૯૪૮૨",
-        },
-        feedback_gu:
-          "દસ્તાવેજ ખૂબ જ સ્પષ્ટ છે અને સર્વે નંબર તથા ખાતેદારનું નામ બરાબર વંચાય છે. આ કાગળ અરજી સાથે જોડવા યોગ્ય છે.",
-        feedback_en:
-          "Document is sharp and legible. The survey number and farmer name match government portal formats.",
-      },
-    };
-  }
-
-  // 2. Application Status Tracker
-  if (
-    query.includes("status") ||
-    query.includes("સ્ટેટસ") ||
-    query.includes("ક્યાં પહોંચ્યું") ||
-    query.includes("ikh-") ||
-    query.includes("અરજી નંબર")
-  ) {
-    const appIdMatch = query.match(/ikh-[0-9]{4}-[0-9]{4}/i);
-    const appId = appIdMatch ? appIdMatch[0].toUpperCase() : "IKH-2025-8841";
-
-    return {
-      response_text:
-        lang === "gu"
-          ? `📋 **આઈ-ખેડૂત અરજી સ્ટેટસ પરિણામ (${appId}):**\n\nનમસ્તે **${farmerName}**! તમારી અરજી ID **${appId}** હાલમાં **ગ્રામ સેવક દ્વારા ચકાસાયેલ છે** અને હવે તાલુકા અધિકારી મંજૂરી બાદ DBT સબસિડી જમા થશે.`
-          : `📋 **iKhedut Application Tracking for ${appId}:**\n\nHello **${farmerName}**! Your application **${appId}** has been successfully verified by Gram Sevak and is currently pending final approval and DBT bank disbursement.`,
-      language: lang,
-      matched_schemes: [IKHEDUT_SCHEMES[0]],
-      citations: ["આઈ-ખેડૂત પોર્ટલ એપ્લિકેશન ટ્રેકિંગ સિસ્ટમ"],
-      intent: "status_tracking",
-      application_status: {
-        application_id: appId,
-        farmer_name: farmerName,
-        scheme_name: "Tractor Sahay Yojana 2025",
-        scheme_name_gu: "ટ્રેક્ટર સહાય યોજના ૨૦૨૫",
-        status: "Verified by Gram Sevak, Pending Bank Transfer",
-        status_gu:
-          "ગ્રામ સેવક દ્વારા કાગળ ચકાસણી પૂર્ણ (DBT ટ્રાન્સફર પ્રક્રિયામાં)",
-        applied_date: "12 ફેબ્રુઆરી 2025",
-        last_updated: "24 ફેબ્રુઆરી 2025",
-        stage: 2,
-        total_stages: 4,
-        disbursement_amount: 60000,
-        district: farmerDistrict,
-        remarks: "All 7/12 & 8-A land records verified successfully.",
-      },
-    };
-  }
-
-  // 3. Mandi APMC Market Prices & Weather
-  const isMandiQuery =
-    /(^|\s)(mandi|market|ભાવ|bhav|rate|price|યાર્ડ|weather|હવામાન|વરસાદ|wheat|ઘઉં|juvar|jowar|જુવાર|bajar|bajra|બાજરી|vegetable|શાકભાજી|chokh|ચોખા|ડાંગર|rice|paddy|mustard|musturd|રાયડો|સરસવ|rai|divela|દિવેલા|એરંડા|castor|potato|બટાટા|batata|onion|ડુંગળી|dungli|tomato|ટામેટા|tameta|marcha|મરચા|chilli|garlic|lasan|લસણ|cotton|કપાસ|kapas|groundnut|મગફળી|magfali|cumin|જીરું|jeera)(\s|$|\?|\.|,)/i.test(
-      query,
-    );
-
-  if (
-    isMandiQuery &&
-    /mandi|market|ભાવ|bhav|rate|price|યાર્ડ|मंडी|भाव/i.test(query) &&
-    !query.includes("ટ્રેક્ટર") &&
-    !query.includes("તાર વાડ")
-  ) {
-    let matchedCrops = searchCropPrices(query);
-    if (matchedCrops.length === 0) {
-      matchedCrops = GUJARAT_MARKET_PRICES.slice(0, 6);
-    }
-
-    const topCropsList = matchedCrops
-      .slice(0, 5)
-      .map((c) =>
-        lang === "gu"
-          ? `• **${c.commodity_gu}:** ₹${c.min_price} થી ₹${c.max_price} / ૨૦ કિગ્રા (સરેરાશ ₹${c.modal_price}) - *${c.market_name_gu}*`
-          : `• **${c.commodity_en}:** ₹${c.min_price} to ₹${c.max_price} / 20kg (Avg ₹${c.modal_price}) - *${c.market_name_en}*`,
-      )
-      .join("\n");
-
-    return {
-      response_text:
-        lang === "gu"
-          ? `📊 **તાજા ગુજરાત APMC બજાર ભાવ અને હવામાન અપડેટ:**\n\n${topCropsList}\n\n💡 **બજાર સલાહ:** સૂકા અને ગ્રેડિંગ કરેલા માલના ઊંચા ભાવ મળે છે. વિગતવાર ભાવ નીચે આપેલા કાર્ડમાં જોઈ શકો છો.`
-          : `📊 **Live Gujarat APMC Mandi Rates & Weather Insights:**\n\n${topCropsList}\n\n💡 **Market Advisory:** Graded and low-moisture produce commands premium bids. You can view all crop rates in the card below.`,
-      language: lang,
-      matched_schemes: [IKHEDUT_SCHEMES[0]],
-      citations: [
-        "ગોંડલ / રાજકોટ / ઊંઝા / ડીસા માર્કેટ યાર્ડ સત્તાવાર બુલેટિન",
-        "ભારતીય હવામાન વિભાગ (IMD Gujarat)",
-      ],
-      intent: "market_weather",
-      market_prices: matchedCrops,
-      weather_data: {
-        location: "Rajkot / Saurashtra Region",
-        location_gu: "રાજકોટ / સૌરાષ્ટ્ર કૃષિ ઝોન",
-        temperature_c: 32,
-        humidity_percent: 45,
-        wind_speed_kmh: 14,
-        rain_probability_percent: 0,
-        forecast_summary:
-          "Clear skies, no rain expected for the next 48 hours.",
-        forecast_summary_gu:
-          "આજે અને આવતીકાલે વરસાદની કોઈ શક્યતા નથી, સ્વચ્છ આકાશ રહેશે.",
-        advisory_gu:
-          "હવામાન અનુકૂળ હોવાથી કપાસ, મગફળી, ઘઉં, જીરું અને શાકભાજી પાક લણણી તેમજ બજાર વેચાણ માટે ઉત્તમ સમય છે.",
-      },
-    };
-  }
-
-  // 4. Conversational Form Filling (I want to apply / અરજી કરવી છે)
-  const isFormQuery =
-    /(^|\s)(apply|અરજી|ફોર્મ|form|ભરવું)(\s|$|\?|\.|,)/i.test(query) &&
-    query.includes("ટ્રેક્ટર");
-  if (isFormQuery) {
-    return {
-      response_text:
-        lang === "gu"
-          ? `📝 **આઈ-ખેડૂત ઓનલાઈન સહાય અરજી ડ્રાફ્ટ (Pre-Filled Application):**\n\nનમસ્તે **${farmerName}**! તમારી પ્રોફાઈલ વિગતો (${farmerDistrict}, ${farmerLand} એકર જમીન, ${farmerCaste} કેટેગરી) ના આધારે **ટ્રેક્ટર સહાય યોજના** માટેનું પ્રિ-ફિલ્ડ ફોર્મ તૈયાર કરવામાં આવ્યું છે.\n\nતમે નીચે આપેલા બટન પરથી સીધું **PDF ફોર્મ ડાઉનલોડ/પ્રિન્ટ** કરી શકો છો અથવા ikhedut.gujarat.gov.in પર અપલોડ કરી શકો છો.`
-          : `📝 **iKhedut Pre-Filled Application Form Draft:**\n\nHello **${farmerName}**! Based on your profile details (${farmerDistrict}, ${farmerLand} acres, ${farmerCaste}), we have pre-filled your application draft for **Tractor Sahay Yojana**.\n\nYou can download the formatted PDF draft below and submit it directly to your Gram Sevak or portal.`,
-      language: lang,
-      matched_schemes: [IKHEDUT_SCHEMES[0]],
-      citations: ["આઈ-ખેડૂત પોર્ટલ ઓનલાઈન અરજી પદ્ધતિ"],
-      intent: "form_filling",
-      prefilled_form: {
-        application_ref:
-          "IKH-DRAFT-" + Math.floor(100000 + Math.random() * 900000),
-        scheme_id: "tractor-sahay-2025",
-        scheme_name: "Tractor Assistance Scheme 2025",
-        scheme_name_gu: "ટ્રેક્ટર સહાય યોજના ૨૦૨૫",
-        farmer_name: farmerName,
-        aadhaar_number: "XXXX-XXXX-૯૪૮૨",
-        mobile_number: "૯૮૨૫XXXXXX",
-        land_size_acres: farmerLand,
-        district: farmerDistrict,
-        taluka: "ગોંડલ",
-        village: "શ્રીનાથગઢ",
-        bank_name: "State Bank of India (SBI)",
-        account_number: "૩૦૯૨XXXXXXX",
-        ifsc_code: "SBIN0001248",
-        caste_category: farmerCaste,
-        created_at: new Date().toLocaleDateString("gu-IN"),
-      },
-    };
-  }
-
-  // 5. Feature 1: Greeting & Scheme Category Greeting Flow
+  // 3. Greeting & Scheme Category Greeting Flow
   const isGreeting =
     /(^|\s)(hello|નમસ્તે|યોજના|scheme|કેટેગરી|category|હાય)(\s|$|\?|\.|,)/i.test(
       query,

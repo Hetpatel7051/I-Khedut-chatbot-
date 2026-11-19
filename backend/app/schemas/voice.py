@@ -1,19 +1,25 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>My Google AI Studio App</title>
-    <meta name="description" content="An application built with Google AI Studio." />
-    <meta property="og:title" content="My Google AI Studio App" />
-    <meta property="og:description" content="An application built with Google AI Studio." />
-    <meta property="og:type" content="website" />
-    <meta name="twitter:card" content="summary_large_image" />
-    <script type="module" crossorigin src="/assets/index-DzsMIcpa.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-C3pOCnFv.css">
-  </head>
-  <body>
-    <div id="root"></div>
-  </body>
-</html>
+from pydantic import BaseModel, Field
 
+
+class VoiceTranscribeRequest(BaseModel):
+    audio_base64: str = Field(min_length=1)
+    language: str = "gu"
+    mime_type: str = "audio/webm"
+
+
+class VoiceTranscribeResponse(BaseModel):
+    transcription: str
+    language: str
+    confidence: float = 0.0
+
+
+class VoiceSynthesizeRequest(BaseModel):
+    text: str = Field(min_length=1)
+    language: str = "gu"
+    gender: str = "female"
+
+
+class VoiceSynthesizeResponse(BaseModel):
+    audio_base64: str
+    language: str
+    mime_type: str = "audio/wav"

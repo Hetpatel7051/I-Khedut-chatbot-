@@ -1,17 +1,16 @@
-# Generative AI Chatbot for iKhedut Portal Assistance (આઈ-ખેડૂત સહાયક)
+# iKhedut Farmer Support Assistant (આઈ-ખેડૂત સહાયક)
 
-An enterprise-grade multilingual Generative AI Chatbot and RAG decision support system for Gujarat farmers to query government agricultural schemes, subsidy percentages, eligibility criteria, and required documents using voice and text in Gujarati (ગુજરાતી), Hindi (हिंदी), and English.
+Multilingual scheme lookup for Gujarat farmers in Gujarati, Hindi, and English. Chat answers use a local BM25-style retriever over the bundled scheme catalog and deterministic response templates. The chat path does not require a generative-model API key.
 
 ---
 
 ## 🌟 Key Features
 
-- 🎙️ **Voice First (STT & TTS):** Speak directly in Gujarati or Hindi; listen to synthesized spoken audio explanations.
-- 🌾 **Comprehensive Scheme Engine:** Seeded with major Gujarat agricultural schemes (Tractor Sahay, Micro Irrigation / GGRC Drip & Sprinkler, Barbed Wire Fencing, Desi Cow Maintenance ₹900/month, Agricultural Drone Subsidy, Smart Phone assistance, Solar Pumps, and Farm Storage Godowns).
-- 🛡️ **RAG with Anti-Hallucination Guardrails:** Embeds verified Government Resolutions (GR) using Google GenAI `text-embedding-004` and ChromaDB vector store. Guardrails strictly audit subsidy numbers and limits.
-- 👨‍🌾 **Farmer Profile Personalization:** Calculates tailored subsidy amounts based on land size (Acres/Vigha), social category (General/OBC/SC/ST/Women), and district.
-- 📋 **Document Checklist & Application Guidance:** Instant checklists for 7/12 & 8-A Satbara records, Aadhaar, Bank Passbooks, and direct portal links.
-- ⚡ **Full-Stack Production Ready:** Dual architecture with React + Tailwind frontend, Node/Express live preview server with `@google/genai`, and Python FastAPI + ChromaDB + Docker Compose backend.
+- 🎙️ **Speech Services:** Speech recognition and speech synthesis use configured Bhashini/gTTS services; text chat remains local.
+- 🌾 **Local Scheme Retrieval:** BM25-style lexical ranking searches scheme names, categories, tags, criteria, and documents in the bundled JSON catalog.
+- ⚠️ **Catalog Caveat:** Bundled records are reference data, not a live or independently verified government feed. Answers and calculator results disclose this and do not claim approval or individual eligibility.
+- 📴 **Honest Availability:** Live APMC prices, weather, application status, and official document verification are reported unavailable until authoritative services are configured.
+- 📋 **Application Guidance:** Checklists and official portal links are provided from the local catalog; the app does not create official applications.
 
 ---
 
@@ -21,17 +20,19 @@ An enterprise-grade multilingual Generative AI Chatbot and RAG decision support 
 # 1. Clone repository and navigate to root
 cd ikhedut-ai-chatbot
 
-# 2. Set environment variables in .env
-echo "GEMINI_API_KEY=your_gemini_api_key" >> .env
+# 2. Add Bhashini credentials to .env only if speech recognition is enabled
+# BHASHINI_API_KEY=...
+# BHASHINI_USER_ID=...
+# BHASHINI_ASR_SERVICE_ID=...
+# BHASHINI_TTS_SERVICE_ID=...
 
-# 3. Spin up PostgreSQL, ChromaDB, FastAPI Backend, and React Frontend
+# 3. Start the configured services
 docker-compose up --build
 ```
 
 Access the services:
 - **Frontend App:** [http://localhost:3000](http://localhost:3000)
 - **FastAPI Documentation:** [http://localhost:8080/docs](http://localhost:8080/docs)
-- **ChromaDB:** [http://localhost:8000](http://localhost:8000)
 
 ---
 
@@ -44,18 +45,17 @@ ikhedut-ai-chatbot/
 │   │   ├── api/v1/           # REST endpoints (chat, voice, schemes, farmer, health)
 │   │   ├── core/             # Configuration, Database, Security
 │   │   ├── models/           # SQLAlchemy models
-│   │   ├── rag/              # ChromaDB vector store, Gemini embedder, Hybrid retriever, Guardrails
+│   │   ├── rag/              # Local BM25 index, retriever, answer templates, and guardrails
 │   │   ├── services/         # Bhashini STT/TTS, Web search, Portal scraper
-│   │   └── llm/              # Gemini SDK client with Gujarati/Hindi/English prompts
 │   ├── requirements.txt
 │   └── Dockerfile
-├── data_pipeline/            # Seed data and vector ingestion CLI
-│   ├── sample_data/          # Official Gujarat iKhedut scheme dataset
-│   ├── ingest.py             # Vector ingestion script
+├── data_pipeline/            # Bundled scheme data and local index verification CLI
+│   ├── sample_data/          # Bundled reference scheme dataset
+│   ├── ingest.py             # Local index reload/verification command
 │   └── scraper_cli.py        # Portal scraper CLI
 ├── frontend/ (and /src)      # React 19 + TypeScript + Tailwind CSS UI
 │   ├── components/           # AudioRecorder, ChatInterface, SchemeCard, ProfileModal, Calculator
 │   └── hooks/                # useAudioRecorder, useChat
-├── server.ts                 # Full-stack Node/Express server for live preview
+├── server.ts                 # Optional Node/Vite proxy to the FastAPI backend
 └── docker-compose.yml
 ```
